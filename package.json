@@ -1,0 +1,40 @@
+{
+  "name": "@jacquesparis/objects-client",
+  "version": "0.0.1-SNAPSHOT.1",
+  "description": "client class",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "npm run format && npm run lint && tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags",
+    "lib": "npm run build && git add -A && git commit -m \"lib\" && git push origin develop:develop && npm publish --access=public",
+    "test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
+    "coverage": "nyc -r text -e .ts -x \"tests/*.test.ts\" npm run test"
+  },
+  "author": "JacquesParis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JacquesParis/objects-client/issues"
+  },
+  "homepage": "https://github.com/JacquesParis/objects-client#readme",
+  "devDependencies": {
+    "@types/jasmine": "^3.5.10",
+    "@types/node": "^13.11.1",
+    "chai": "^4.2.0",
+    "install-peers": "^1.0.3",
+    "jasmine": "^3.5.0",
+    "nyc": "^15.0.1",
+    "prettier": "^1.14.3",
+    "ts-node": "^8.8.2",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "@jacquesparis/objects-model": "file:../objects-model",
+    "typed-rest-client": "^1.7.3"
+  }
+}
