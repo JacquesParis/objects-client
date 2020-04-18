@@ -21,20 +21,14 @@
   },
   "homepage": "https://github.com/JacquesParis/objects-client#readme",
   "devDependencies": {
-    "@types/jasmine": "^3.5.10",
-    "@types/node": "^13.11.1",
-    "chai": "^4.2.0",
-    "install-peers": "^1.0.3",
-    "jasmine": "^3.5.0",
-    "nyc": "^15.0.1",
     "prettier": "^1.14.3",
-    "ts-node": "^8.8.2",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
-    "typescript": "^3.8.3"
+    "typescript": "^3.1.5",
+    "@jacquesparis/objects-model": "file:../objects-model"
   },
-  "dependencies": {
-    "@jacquesparis/objects-model": "file:../objects-model",
-    "typed-rest-client": "^1.7.3"
+  "dependencies": {},
+  "peerDependencies": {
+    "@jacquesparis/objects-model": "file:../objects-model"
   }
 }

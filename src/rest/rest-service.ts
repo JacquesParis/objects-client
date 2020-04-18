@@ -1,34 +1,23 @@
-import { IDataEntity } from '@jacquesparis/objects-model';
+import {IRestEntity} from '@jacquesparis/objects-model';
+import {IRestQueryParam, IRestResponse, IRestService} from './i-rest-service';
+export class RestService<T extends IRestEntity> {
+  constructor(protected cnstrctor: new () => T, protected httpService: IRestService, protected server?: string) {}
 
-import { IRequestOptions, IRestResponse, RestClient } from 'typed-rest-client/RestClient';
-
-interface IRestQueryParam {
-  [param: string]: any
-}
-
-export class RestService<T extends IDataEntity> {
-  protected rest: RestClient;
-
-  constructor(protected server?: string) {
-    this.rest = new RestClient('typed-rest-client-tests');
+  protected async _get(uri: string): Promise<T> {
+    const restRes: IRestResponse<T> = await this.httpService.get<T>(uri);
+    return Object.assign(new this.cnstrctor(), restRes.result);
   }
 
-  protected async get(uri: string): Promise<T> {
-    const restRes: IRestResponse<T> = await this.rest.get<T>(uri);
-    return restRes.result;
+  protected async _getAll(queryParams?: IRestQueryParam): Promise<T[]> {
+    const restRes: IRestResponse<T[]> = await this.httpService.get<T[]>(this.server, queryParams);
+    const res: T[] = [];
+    restRes.result.forEach(oneResult => {
+      res.push(Object.assign(new this.cnstrctor(), oneResult));
+    });
+    return res;
   }
 
-  protected async getAll(queryParams?: IRestQueryParam): Promise<T[]> {
-    const options: IRequestOptions = {};
-    if (queryParams && 0 < Object.keys(queryParams).length) {
-      options.queryParameters = {
-        params: {}
-      };
-      Object.keys(queryParams).forEach(key => {
-        options.queryParameters.params[key] = JSON.stringify(queryParams[key]);
-      })
-    }
-    const restRes: IRestResponse<T[]> = await this.rest.get<T[]>(this.server, options);
-    return restRes.result;
+  protected async _put(uri: string, entity: Partial<T>): Promise<void> {
+    await this.httpService.put<Partial<T>>(uri, entity);
   }
 }

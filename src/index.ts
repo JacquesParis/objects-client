@@ -1,1 +1,3 @@
-export * from './objects-type/objects-type-service';
+export * from './objects-type/index';
+
+export * from './rest/index';
