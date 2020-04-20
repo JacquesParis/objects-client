@@ -1,8 +1,9 @@
+import {IRestEntityService} from '../rest/i-rest-entity-service';
 import {IRestService} from '../rest/i-rest-service';
 import {RestService} from '../rest/rest-service';
 import {ObjectTypeImpl} from './object-type.impl';
 
-export class ObjectsTypeService extends RestService<ObjectTypeImpl> {
+export class ObjectsTypeService extends RestService<ObjectTypeImpl> implements IRestEntityService<ObjectTypeImpl> {
   constructor(protected httpService: IRestService, protected server: string) {
     super(ObjectTypeImpl, httpService, server);
   }
@@ -29,7 +30,11 @@ export class ObjectsTypeService extends RestService<ObjectTypeImpl> {
     });
   }
 
-  public async put(objectType: ObjectTypeImpl): Promise<void> {
-    return super._put(objectType.uri, objectType.entityProperties);
+  public async put(uri: string, objectType: Partial<ObjectTypeImpl>): Promise<void> {
+    return super._put(uri, objectType);
+  }
+
+  public post(objectType: Partial<ObjectTypeImpl>): Promise<ObjectTypeImpl> {
+    return this._post(objectType);
   }
 }

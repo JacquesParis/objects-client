@@ -10,4 +10,6 @@ export interface IRestResponse<T> {
 export interface IRestService {
   get<T>(uri: string, queryParams?: IRestQueryParam): Promise<IRestResponse<T>>;
   put<T>(uri: string, entity: T): Promise<IRestResponse<void>>;
+  patch<T>(uri: string, entity: T): Promise<IRestResponse<void>>;
+  post<T>(uri: string, entity: T): Promise<IRestResponse<T>>;
 }
