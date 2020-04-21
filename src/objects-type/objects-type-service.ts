@@ -34,6 +34,10 @@ export class ObjectsTypeService extends RestService<ObjectTypeImpl> implements I
     return super._put(uri, objectType);
   }
 
+  public async patch(uri: string, objectType: Partial<ObjectTypeImpl>): Promise<void> {
+    return super._patch(uri, objectType);
+  }
+
   public post(objectType: Partial<ObjectTypeImpl>): Promise<ObjectTypeImpl> {
     return this._post(objectType);
   }

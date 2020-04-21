@@ -6,6 +6,19 @@ import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {IRestEntityService} from './i-rest-entity-service';
 export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   implements IEntityPropertiesWrapper<T>, IRestEntity {
+  set editionProperties(value: Partial<T>) {
+    if (this.enableAutoSave) {
+      this.updateEditionProperties(value);
+    } else {
+      this._editionProperties = value;
+    }
+  }
+  get editionProperties(): Partial<T> {
+    return this._editionProperties;
+  }
+  get entityProperties(): Partial<T> {
+    return this._entityProperties;
+  }
   public uri?: string;
   public id?: string;
   public enableAutoSave = true;
@@ -15,28 +28,25 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   protected abstract _editionProperties: Partial<T>;
   constructor(protected restEntityService: IRestEntityService<T>) {}
 
-  public makePatchProperties(from: Partial<T>): Partial<T> {
-    const entityProperties = this.entityProperties;
-
-    for (const key of Object.keys(from)) {
-      if (!(key in entityProperties)) {
-        entityProperties[key] = null;
-      }
+  public async updateEditionProperties(properties: Partial<T>): Promise<void> {
+    const fromEditionProperties = this._editionProperties;
+    const fromEntityProperties = this._entityProperties;
+    this._editionProperties = properties;
+    try {
+      await this.save(fromEntityProperties);
+    } catch (error) {
+      this._editionProperties = fromEditionProperties;
+      throw error;
     }
-    for (const key of Object.keys(entityProperties)) {
-      if (key in from && _.equals(from[key], entityProperties[key])) {
-        delete entityProperties[key];
-      }
-    }
-    return entityProperties;
   }
 
   public async save(from?: Partial<T>): Promise<void> {
+    const to = this.entityProperties;
     if (this.id) {
       if (from && this.restEntityService.patch) {
-        await this.restEntityService.patch(this.uri, this.makePatchProperties(from));
+        await this.restEntityService.patch(this.uri, this.makePatchProperties(from, to));
       } else if (this.restEntityService.put) {
-        await this.restEntityService.put(this.uri, this.entityProperties);
+        await this.restEntityService.put(this.uri, to);
       } else {
         throw new ErrorNoUpdteFunction<T>(this);
       }
@@ -47,16 +57,19 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
     }
   }
 
-  set editionProperties(value: Partial<T>) {
-    this._editionProperties = value;
-    if (this.enableAutoSave) {
-      this.save();
+  protected makePatchProperties(from: Partial<T>, to?: Partial<T>): Partial<T> {
+    const entityProperties = to ? _.cloneDeep(to) : this.entityProperties;
+
+    for (const key of Object.keys(from)) {
+      if (!(key in entityProperties)) {
+        entityProperties[key] = null;
+      }
     }
-  }
-  get editionProperties(): Partial<T> {
-    return this._editionProperties;
-  }
-  get entityProperties(): Partial<T> {
-    return this._entityProperties;
+    for (const key of Object.keys(entityProperties)) {
+      if (key in from && _.isEqual(from[key], entityProperties[key])) {
+        delete entityProperties[key];
+      }
+    }
+    return entityProperties;
   }
 }
