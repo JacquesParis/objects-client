@@ -22,7 +22,7 @@
   "homepage": "https://github.com/JacquesParis/objects-client#readme",
   "devDependencies": {
     "@jacquesparis/objects-model": "file:../objects-model",
-    "lodash": "^4.17.15",
+    "lodash-es": "^4.17.15",
     "prettier": "^1.14.3",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
@@ -31,6 +31,6 @@
   "dependencies": {},
   "peerDependencies": {
     "@jacquesparis/objects-model": "file:../objects-model",
-    "lodash": "^4.17.15"
+    "lodash-es": "^4.17.15"
   }
 }

@@ -1,5 +1,5 @@
 import {IRestEntity} from '@jacquesparis/objects-model';
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 
 import {ErrorNoUpdteFunction} from '../errors/error-no-update-funtion';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
