@@ -33,15 +33,4 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
       definition: this.definition,
     };
   }
-  set _editionProperties(value: Partial<ObjectTypeImpl>) {
-    this.name = value.name;
-    this.type = value.type;
-    this.definitionString = value.definitionString;
-  }
-  get _editionProperties(): Partial<ObjectTypeImpl> {
-    const editionProperties = this.entityProperties;
-    delete editionProperties.definition;
-    editionProperties.definitionString = this.definitionString;
-    return editionProperties;
-  }
 }

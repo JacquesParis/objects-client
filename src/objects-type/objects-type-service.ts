@@ -1,11 +1,40 @@
+import {EntityName} from '../model/entity-name';
+import {IJsonSchema} from '../model/i-json-shema';
 import {IRestEntityService} from '../rest/i-rest-entity-service';
 import {IRestService} from '../rest/i-rest-service';
 import {RestService} from '../rest/rest-service';
 import {ObjectTypeImpl} from './object-type.impl';
 
+const OBJECT_TYP_SCHEMA: IJsonSchema = {
+  properties: {
+    name: {
+      type: 'string',
+      // tslint:disable-next-line: object-literal-sort-keys
+      title: 'Object type name',
+      minLength: 3,
+      required: true,
+    },
+    type: {
+      type: 'string',
+      // tslint:disable-next-line: object-literal-sort-keys
+      title: 'Stockage type',
+      required: true,
+    },
+    // tslint:disable-next-line: object-literal-sort-keys
+    definition: {
+      type: 'object',
+      // tslint:disable-next-line: object-literal-sort-keys
+      title: 'Object type json schema description',
+      'x-schema-form': {
+        type: 'json',
+      },
+      required: true,
+    },
+  },
+};
 export class ObjectsTypeService extends RestService<ObjectTypeImpl> implements IRestEntityService<ObjectTypeImpl> {
   constructor(protected httpService: IRestService, protected server: string) {
-    super(ObjectTypeImpl, httpService, server);
+    super(EntityName.objectType, OBJECT_TYP_SCHEMA, ObjectTypeImpl, httpService, server);
   }
 
   public async get(uri: string): Promise<ObjectTypeImpl> {

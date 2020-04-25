@@ -1,7 +1,11 @@
 import {IRestEntity} from '@jacquesparis/objects-model';
+import {EntityName} from '../model/entity-name';
+import {IJsonSchema} from '../model/i-json-shema';
 import {IRestQueryParam, IRestResponse, IRestService} from './i-rest-service';
 export class RestService<T extends IRestEntity> {
   constructor(
+    public entityName: EntityName,
+    public entityDefinition: IJsonSchema,
     protected cnstrctor: new (restService: RestService<T>) => T,
     protected httpService: IRestService,
     protected server?: string,

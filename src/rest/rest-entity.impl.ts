@@ -19,13 +19,29 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   get entityProperties(): Partial<T> {
     return this._entityProperties;
   }
+
+  set _editionProperties(value: Partial<T>) {
+    Object.keys(this.entityProperties).forEach(key => {
+      if (!(key in value)) {
+        delete this[key];
+      } else {
+        if (_.isArray(value[key]) || _.isObject(value[key])) {
+          this[key] = _.cloneDeep(value[key]);
+        } else {
+          this[key] = value[key];
+        }
+      }
+    });
+  }
+  get _editionProperties(): Partial<T> {
+    return _.cloneDeep(this.entityProperties);
+  }
   public uri?: string;
   public id?: string;
   public enableAutoSave = true;
   // tslint:disable-next-line: variable-name
   protected abstract _entityProperties: Partial<T>;
-  // tslint:disable-next-line: variable-name
-  protected abstract _editionProperties: Partial<T>;
+
   constructor(protected restEntityService: IRestEntityService<T>) {}
 
   public async updateEditionProperties(properties: Partial<T>): Promise<void> {
