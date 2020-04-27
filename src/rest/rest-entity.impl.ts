@@ -1,9 +1,9 @@
 import {IRestEntity} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
 
-import {ErrorNoUpdteFunction} from '../errors/error-no-update-funtion';
+import {ErrorNoUpdateFunction} from '../errors/error-no-update-funtion';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
-import {IRestEntityService} from './i-rest-entity-service';
+import {IRestEntityService} from './i-rest-entity.service';
 export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   implements IEntityPropertiesWrapper<T>, IRestEntity {
   set editionProperties(value: Partial<T>) {
@@ -21,9 +21,16 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   }
 
   set _editionProperties(value: Partial<T>) {
-    Object.keys(this.entityProperties).forEach(key => {
+    const entityProperties = this.entityProperties;
+    Object.keys(entityProperties).forEach(key => {
       if (!(key in value)) {
-        delete this[key];
+        if (_.isArray(entityProperties[key])) {
+          this[key] = [];
+        } else if (_.isObject(entityProperties[key])) {
+          this[key] = {};
+        } else {
+          this[key] = null;
+        }
       } else {
         if (_.isArray(value[key]) || _.isObject(value[key])) {
           this[key] = _.cloneDeep(value[key]);
@@ -44,6 +51,11 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
 
   constructor(protected restEntityService: IRestEntityService<T>) {}
 
+  public assign(value: Partial<T>): T {
+    Object.assign(this, value);
+    return (this as unknown) as T;
+  }
+
   public async updateEditionProperties(properties: Partial<T>): Promise<void> {
     const fromEditionProperties = this._editionProperties;
     const fromEntityProperties = this._entityProperties;
@@ -60,11 +72,14 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
     const to = this.entityProperties;
     if (this.id) {
       if (from && this.restEntityService.patch) {
-        await this.restEntityService.patch(this.uri, this.makePatchProperties(from, to));
+        const patchProperties = this.makePatchProperties(from, to);
+        if (0 < Object.keys(patchProperties).length) {
+          await this.restEntityService.patch(this.uri, this.makePatchProperties(from, to));
+        }
       } else if (this.restEntityService.put) {
         await this.restEntityService.put(this.uri, to);
       } else {
-        throw new ErrorNoUpdteFunction<T>(this);
+        throw new ErrorNoUpdateFunction<T>(this);
       }
     } else {
       if (this.restEntityService.post) {

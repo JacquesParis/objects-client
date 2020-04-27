@@ -1,11 +1,11 @@
 import {EntityName} from '../model/entity-name';
 import {IJsonSchema} from '../model/i-json-shema';
-import {IRestEntityService} from '../rest/i-rest-entity-service';
+import {IRestEntityService} from '../rest/i-rest-entity.service';
 import {IRestService} from '../rest/i-rest-service';
 import {RestService} from '../rest/rest-service';
 import {ObjectTypeImpl} from './object-type.impl';
 
-const OBJECT_TYP_SCHEMA: IJsonSchema = {
+const OBJECT_TYPE_SCHEMA: IJsonSchema = {
   properties: {
     name: {
       type: 'string',
@@ -32,9 +32,17 @@ const OBJECT_TYP_SCHEMA: IJsonSchema = {
     },
   },
 };
-export class ObjectsTypeService extends RestService<ObjectTypeImpl> implements IRestEntityService<ObjectTypeImpl> {
-  constructor(protected httpService: IRestService, protected server: string) {
-    super(EntityName.objectType, OBJECT_TYP_SCHEMA, ObjectTypeImpl, httpService, server);
+export class ObjectTypesService extends RestService<ObjectTypeImpl> implements IRestEntityService<ObjectTypeImpl> {
+  public static getService(httpService: IRestService, baseUri: string) {
+    if (!ObjectTypesService.SERVICE) {
+      ObjectTypesService.SERVICE = new ObjectTypesService(httpService, baseUri);
+    }
+    return ObjectTypesService.SERVICE;
+  }
+  protected static SERVICE: ObjectTypesService;
+
+  protected constructor(public httpService: IRestService, public baseUri: string) {
+    super(EntityName.objectType, OBJECT_TYPE_SCHEMA, ObjectTypeImpl, httpService, baseUri);
   }
 
   public async get(uri: string): Promise<ObjectTypeImpl> {

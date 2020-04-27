@@ -1,5 +1,7 @@
-export * from './objects-type/index';
+export * from './object-type';
 
-export * from './rest/index';
+export * from './rest';
 
 export * from './model';
+
+export * from './object-sub-type';

@@ -6,4 +6,5 @@ export interface IEntityPropertiesWrapper<T extends IRestEntity> extends IRestEn
   enableAutoSave: boolean;
   updateEditionProperties(properties: Partial<T>): Promise<void>;
   save(from?: Partial<T>): Promise<void>;
+  assign(value: Partial<T>): T;
 }
