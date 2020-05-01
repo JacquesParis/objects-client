@@ -21,15 +21,17 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   }
 
   set _editionProperties(value: Partial<T>) {
-    const entityProperties = this.entityProperties;
-    Object.keys(entityProperties).forEach(key => {
+    Object.keys(this.restEntityService.entityDefinition.properties).forEach(key => {
       if (!(key in value)) {
-        if (_.isArray(entityProperties[key])) {
-          this[key] = [];
-        } else if (_.isObject(entityProperties[key])) {
-          this[key] = {};
-        } else {
-          this[key] = null;
+        switch (this.restEntityService.entityDefinition.properties[key].type) {
+          case 'array':
+            this[key] = [];
+            break;
+          case 'object':
+            this[key] = {};
+          default:
+            this[key] = null;
+            break;
         }
       } else {
         if (_.isArray(value[key]) || _.isObject(value[key])) {
@@ -41,7 +43,24 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
     });
   }
   get _editionProperties(): Partial<T> {
-    return _.cloneDeep(this.entityProperties);
+    const result = _.cloneDeep(this.entityProperties);
+    Object.keys(this.restEntityService.entityDefinition.properties).forEach(key => {
+      switch (this.restEntityService.entityDefinition.properties[key].type) {
+        case 'array':
+          if (!result[key]) {
+            result[key] = [];
+          }
+          break;
+        case 'object':
+          if (!result[key]) {
+            result[key] = {};
+          }
+
+        default:
+          break;
+      }
+    });
+    return result;
   }
   public uri?: string;
   public id?: string;
