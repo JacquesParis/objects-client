@@ -1,4 +1,4 @@
-export class ErrorOjectsClient extends Error {
+export class ErrorObjectsClient extends Error {
   public code: string;
   constructor(message, public params?: any[]) {
     super(message);

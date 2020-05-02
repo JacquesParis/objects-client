@@ -1,8 +1,8 @@
 import {EntityName} from '../model/entity-name';
-import {IJsonSchema} from '../model/i-json-shema';
+import {IJsonSchema} from '../model/i-json-schema';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
-import {IRestService} from '../rest/i-rest-service';
-import {RestService} from '../rest/rest-service';
+import {IRestService} from '../rest/i-rest.service';
+import {RestService} from '../rest/rest.service';
 import {ObjectSubTypeImpl} from './object-sub-type.impl';
 
 const OBJECT_SUB_TYPE_SCHEMA: IJsonSchema = {
@@ -20,10 +20,13 @@ const OBJECT_SUB_TYPE_SCHEMA: IJsonSchema = {
       type: 'number',
       title: 'Minimum number of child',
       minimum: 0,
+      default: 0,
     },
     max: {
       type: 'number',
       title: 'Maximum number of child',
+      default: Number.MAX_SAFE_INTEGER,
+      maximum: Number.MAX_SAFE_INTEGER,
     },
     exclusions: {
       type: 'array',

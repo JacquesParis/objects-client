@@ -1,1 +1,1 @@
-export * from './i-rest-service';
+export * from './i-rest.service';

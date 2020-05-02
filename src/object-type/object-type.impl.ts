@@ -10,7 +10,7 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
   public name: string;
   public type: string;
   public definition: any;
-  public objectSubTypes: ObjectSubTypeImpl[];
+  public objectSubTypes: ObjectSubTypeImpl[] = [];
   public uri?: string;
   public id?: string;
 

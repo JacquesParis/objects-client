@@ -1,7 +1,9 @@
 import {IRestEntity} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
 
-import {ErrorNoUpdateFunction} from '../errors/error-no-update-funtion';
+import {ErrorNoCreationFunction} from '../errors/error-no-creation-function';
+import {ErrorNoDeletionFunction} from '../errors/error-no-deletion-function';
+import {ErrorNoUpdateFunction} from '../errors/error-no-update-function';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {IRestEntityService} from './i-rest-entity.service';
 export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
@@ -23,15 +25,19 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   set _editionProperties(value: Partial<T>) {
     Object.keys(this.restEntityService.entityDefinition.properties).forEach(key => {
       if (!(key in value)) {
-        switch (this.restEntityService.entityDefinition.properties[key].type) {
-          case 'array':
-            this[key] = [];
-            break;
-          case 'object':
-            this[key] = {};
-          default:
-            this[key] = null;
-            break;
+        if ('default' in this.restEntityService.entityDefinition.properties[key]) {
+          this[key] = this.restEntityService.entityDefinition.properties[key].default;
+        } else {
+          switch (this.restEntityService.entityDefinition.properties[key].type) {
+            case 'array':
+              this[key] = [];
+              break;
+            case 'object':
+              this[key] = {};
+            default:
+              this[key] = null;
+              break;
+          }
         }
       } else {
         if (_.isArray(value[key]) || _.isObject(value[key])) {
@@ -45,19 +51,20 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   get _editionProperties(): Partial<T> {
     const result = _.cloneDeep(this.entityProperties);
     Object.keys(this.restEntityService.entityDefinition.properties).forEach(key => {
-      switch (this.restEntityService.entityDefinition.properties[key].type) {
-        case 'array':
-          if (!result[key]) {
-            result[key] = [];
+      if (undefined === result[key] || null === result[key]) {
+        if ('default' in this.restEntityService.entityDefinition.properties[key]) {
+          result[key] = this.restEntityService.entityDefinition.properties[key].default;
+        } else {
+          switch (this.restEntityService.entityDefinition.properties[key].type) {
+            case 'array':
+              result[key] = [];
+              break;
+            case 'object':
+              result[key] = {};
+            default:
+              break;
           }
-          break;
-        case 'object':
-          if (!result[key]) {
-            result[key] = {};
-          }
-
-        default:
-          break;
+        }
       }
     });
     return result;
@@ -68,7 +75,19 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   // tslint:disable-next-line: variable-name
   protected abstract _entityProperties: Partial<T>;
 
-  constructor(protected restEntityService: IRestEntityService<T>) {}
+  constructor(protected restEntityService: IRestEntityService<T>) {
+    const properties: {
+      [name: string]: any;
+    } = this.restEntityService.entityDefinition.properties;
+    Object.keys(properties).forEach(key => {
+      if ('default' in properties[key]) {
+        this[key] = properties[key].default;
+      }
+    });
+  }
+  get isNewEntity(): boolean {
+    return !this.id;
+  }
 
   public assign(value: Partial<T>): T {
     Object.assign(this, value);
@@ -100,10 +119,21 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
       } else {
         throw new ErrorNoUpdateFunction<T>(this);
       }
-    } else {
+    } else if (this.restEntityService.post) {
       if (this.restEntityService.post) {
-        await this.restEntityService.post(this.entityProperties);
+        const createdImpl = await this.restEntityService.post(this.entityProperties);
+        Object.assign(this, createdImpl);
       }
+    } else {
+      throw new ErrorNoCreationFunction<T>(this);
+    }
+  }
+
+  public async delete(): Promise<void> {
+    if (this.restEntityService.delete) {
+      this.restEntityService.delete(this.uri);
+    } else {
+      throw new ErrorNoDeletionFunction<T>(this);
     }
   }
 

@@ -1,8 +1,8 @@
 import {IRestEntity} from '@jacquesparis/objects-model';
 import {IEntityPropertiesWrapper} from '../model';
 import {EntityName} from '../model/entity-name';
-import {IJsonSchema} from '../model/i-json-shema';
-import {IRestQueryParam, IRestResponse, IRestService} from './i-rest-service';
+import {IJsonSchema} from '../model/i-json-schema';
+import {IRestQueryParam, IRestResponse, IRestService} from './i-rest.service';
 import {RestEntityImpl} from './rest-entity.impl';
 export class RestService<T extends RestEntityImpl<T>> {
   constructor(
@@ -46,6 +46,10 @@ export class RestService<T extends RestEntityImpl<T>> {
   protected async _post(entity: Partial<T>): Promise<T> {
     const restRes: IRestResponse<Partial<T>> = await this.httpService.post<Partial<T>>(this.restUri, entity);
     return this.getEntity(restRes.result);
+  }
+
+  protected async _delete(uri: string): Promise<void> {
+    await this.httpService.delete(uri);
   }
 
   private camelToKebabCase(str: string) {

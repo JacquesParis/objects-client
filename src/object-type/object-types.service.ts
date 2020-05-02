@@ -1,8 +1,8 @@
 import {EntityName} from '../model/entity-name';
-import {IJsonSchema} from '../model/i-json-shema';
+import {IJsonSchema} from '../model/i-json-schema';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
-import {IRestService} from '../rest/i-rest-service';
-import {RestService} from '../rest/rest-service';
+import {IRestService} from '../rest/i-rest.service';
+import {RestFullService} from '../rest/rest-full.service';
 import {ObjectTypeImpl} from './object-type.impl';
 
 const OBJECT_TYPE_SCHEMA: IJsonSchema = {
@@ -11,6 +11,7 @@ const OBJECT_TYPE_SCHEMA: IJsonSchema = {
       type: 'string',
       // tslint:disable-next-line: object-literal-sort-keys
       title: 'Object type name',
+      default: '',
       minLength: 3,
       required: true,
     },
@@ -18,6 +19,7 @@ const OBJECT_TYPE_SCHEMA: IJsonSchema = {
       type: 'string',
       // tslint:disable-next-line: object-literal-sort-keys
       title: 'Stockage type',
+      default: '',
       required: true,
     },
     // tslint:disable-next-line: object-literal-sort-keys
@@ -28,11 +30,12 @@ const OBJECT_TYPE_SCHEMA: IJsonSchema = {
       'x-schema-form': {
         type: 'json',
       },
+      default: {},
       required: true,
     },
   },
 };
-export class ObjectTypesService extends RestService<ObjectTypeImpl> implements IRestEntityService<ObjectTypeImpl> {
+export class ObjectTypesService extends RestFullService<ObjectTypeImpl> implements IRestEntityService<ObjectTypeImpl> {
   public static getService(httpService: IRestService, baseUri: string) {
     if (!ObjectTypesService.SERVICE) {
       ObjectTypesService.SERVICE = new ObjectTypesService(httpService, baseUri);
@@ -45,12 +48,10 @@ export class ObjectTypesService extends RestService<ObjectTypeImpl> implements I
     super(EntityName.objectType, OBJECT_TYPE_SCHEMA, ObjectTypeImpl, httpService, baseUri);
   }
 
-  public async get(uri: string): Promise<ObjectTypeImpl> {
-    return super._get(uri);
-  }
   public async getAll(): Promise<ObjectTypeImpl[]> {
     return super._getAll({
       filter: {
+        order: ['name'],
         fields: {
           definition: true,
           id: true,
@@ -61,21 +62,12 @@ export class ObjectTypesService extends RestService<ObjectTypeImpl> implements I
         include: [
           {
             relation: 'objectSubTypes',
+            scope: {
+              order: ['index'],
+            },
           },
         ],
       },
     });
-  }
-
-  public async put(uri: string, objectType: Partial<ObjectTypeImpl>): Promise<void> {
-    return super._put(uri, objectType);
-  }
-
-  public async patch(uri: string, objectType: Partial<ObjectTypeImpl>): Promise<void> {
-    return super._patch(uri, objectType);
-  }
-
-  public post(objectType: Partial<ObjectTypeImpl>): Promise<ObjectTypeImpl> {
-    return this._post(objectType);
   }
 }
