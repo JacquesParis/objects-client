@@ -11,10 +11,15 @@ export class RestService<T extends RestEntityImpl<T>> {
     protected cnstrctor: new (restService: RestService<T>) => T,
     public httpService: IRestService,
     public baseUri?: string,
+    public parent: EntityName = null,
   ) {}
 
+  protected getEntityUri(entityName: EntityName = this.entityName): string {
+    return `${this.baseUri}/${this.camelToKebabCase(entityName)}s/`;
+  }
+
   protected get restUri(): string {
-    return `${this.baseUri}/${this.camelToKebabCase(this.entityName)}s/`;
+    return this.getEntityUri();
   }
 
   protected async _get(uri: string): Promise<T> {
@@ -44,8 +49,18 @@ export class RestService<T extends RestEntityImpl<T>> {
   }
 
   protected async _post(entity: Partial<T>): Promise<T> {
-    const restRes: IRestResponse<Partial<T>> = await this.httpService.post<Partial<T>>(this.restUri, entity);
+    const restRes: IRestResponse<Partial<T>> = await this.httpService.post<Partial<T>>(
+      this.getParentUri(entity),
+      entity,
+    );
     return this.getEntity(restRes.result);
+  }
+
+  protected getParentUri(entity: Partial<T>): string {
+    if (!this.parent) {
+      return this.restUri;
+    }
+    return `${this.getEntityUri(this.parent) + entity[this.parent + 'Id']}/${this.camelToKebabCase(this.entityName)}s/`;
   }
 
   protected async _delete(uri: string): Promise<void> {

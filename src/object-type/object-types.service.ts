@@ -49,25 +49,6 @@ export class ObjectTypesService extends RestFullService<ObjectTypeImpl> implemen
   }
 
   public async getAll(): Promise<ObjectTypeImpl[]> {
-    return super._getAll({
-      filter: {
-        order: ['name'],
-        fields: {
-          definition: true,
-          id: true,
-          name: true,
-          type: true,
-          uri: true,
-        },
-        include: [
-          {
-            relation: 'objectSubTypes',
-            scope: {
-              order: ['index'],
-            },
-          },
-        ],
-      },
-    });
+    return super._getAll();
   }
 }

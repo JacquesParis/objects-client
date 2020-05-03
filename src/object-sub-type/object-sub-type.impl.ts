@@ -15,6 +15,7 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
       exclusions: this.exclusions,
       mandatories: this.mandatories,
       subObjectTypeId: this.subObjectTypeId,
+      objectTypeId: this.objectTypeId,
     };
   }
   public name?: string;
@@ -25,10 +26,12 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
   public mandatories?: string[];
   public subObjectTypeId: string;
   public subObjectTypeUri?: string;
-  public objectTypeId: string;
-  public objectTypeUri?: string;
   public objectType?: ObjectTypeImpl;
-  constructor(objectSubTypesService: ObjectSubTypesService) {
+  constructor(
+    objectSubTypesService: ObjectSubTypesService,
+    public objectTypeId?: string,
+    public objectTypeUri?: string,
+  ) {
     super(objectSubTypesService);
   }
 }

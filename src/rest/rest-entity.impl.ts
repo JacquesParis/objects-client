@@ -108,7 +108,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
 
   public async save(from?: Partial<T>): Promise<void> {
     const to = this.entityProperties;
-    if (this.id) {
+    if (!this.isNewEntity) {
       if (from && this.restEntityService.patch) {
         const patchProperties = this.makePatchProperties(from, to);
         if (0 < Object.keys(patchProperties).length) {

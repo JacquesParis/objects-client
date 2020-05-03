@@ -55,10 +55,25 @@ export class ObjectSubTypesService extends RestService<ObjectSubTypeImpl>
   }
   protected static SERVICE: ObjectSubTypesService;
   protected constructor(public httpService: IRestService, public baseUri: string) {
-    super(EntityName.objectSubType, OBJECT_SUB_TYPE_SCHEMA, ObjectSubTypeImpl, httpService, baseUri);
+    super(
+      EntityName.objectSubType,
+      OBJECT_SUB_TYPE_SCHEMA,
+      ObjectSubTypeImpl,
+      httpService,
+      baseUri,
+      EntityName.objectType,
+    );
   }
 
-  public async patch(uri: string, objectSubType: Partial<ObjectSubTypeImpl>): Promise<void> {
-    return super._patch(uri, objectSubType);
+  public async patch(uri: string, objectType: Partial<ObjectSubTypeImpl>): Promise<void> {
+    return super._patch(uri, objectType);
+  }
+
+  public post(objectType: Partial<ObjectSubTypeImpl>): Promise<ObjectSubTypeImpl> {
+    return this._post(objectType);
+  }
+
+  public delete(uri: string): Promise<void> {
+    return super._delete(uri);
   }
 }
