@@ -1,5 +1,6 @@
-import {IObjectType, ObjectContentType} from '@jacquesparis/objects-model';
+import {IObjectType} from '@jacquesparis/objects-model';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
+import {ObjectContentType} from '../model/object-content-type';
 import {ObjectSubTypeImpl} from '../object-sub-type/object-sub-type.impl';
 import {ObjectSubTypesService} from '../object-sub-type/object-sub-types.service';
 import {RestEntityImpl} from '../rest/rest-entity.impl';

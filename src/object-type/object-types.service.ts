@@ -1,6 +1,11 @@
-import {ObjectContentType} from '@jacquesparis/objects-model';
 import {EntityName} from '../model/entity-name';
 import {IJsonSchema} from '../model/i-json-schema';
+import {
+  CONTENT_TYPE_FILE,
+  CONTENT_TYPE_FILES,
+  CONTENT_TYPE_JSON,
+  CONTENT_TYPE_TEXT,
+} from '../model/object-content-type';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
 import {IRestService} from '../rest/i-rest.service';
 import {RestFullService} from '../rest/rest-full.service';
@@ -24,19 +29,19 @@ const OBJECT_TYPE_SCHEMA: IJsonSchema = {
       nullable: false,
       oneOf: [
         {
-          enum: [ObjectContentType.JSON],
+          enum: [CONTENT_TYPE_JSON],
           title: 'Default structure object (JSON)',
         },
         {
-          enum: [ObjectContentType.FILE],
+          enum: [CONTENT_TYPE_FILE],
           title: 'File content',
         },
         {
-          enum: [ObjectContentType.FILES],
+          enum: [CONTENT_TYPE_FILES],
           title: 'Files list content',
         },
         {
-          enum: [ObjectContentType.TEXT],
+          enum: [CONTENT_TYPE_TEXT],
           title: 'Text content',
         },
       ],
