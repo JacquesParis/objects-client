@@ -1,5 +1,7 @@
+import * as _ from 'lodash-es';
 import {EntityName} from '../model/entity-name';
 import {IJsonSchema} from '../model/i-json-schema';
+import {ObjectTypeImpl} from '../object-type/object-type.impl';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
 import {IRestService} from '../rest/i-rest.service';
 import {RestService} from '../rest/rest.service';
@@ -75,5 +77,46 @@ export class ObjectSubTypesService extends RestService<ObjectSubTypeImpl>
 
   public delete(uri: string): Promise<void> {
     return super._delete(uri);
+  }
+
+  public getSchema(
+    objectSubType: ObjectSubTypeImpl,
+    objectTypeOwner: ObjectTypeImpl,
+    allObjectTypes: ObjectTypeImpl[],
+  ): IJsonSchema {
+    const schema = _.cloneDeep(this.entityDefinition);
+    schema.properties.subObjectTypeId.oneOf = [];
+    allObjectTypes.forEach(availableObjectType => {
+      schema.properties.subObjectTypeId.oneOf.push({
+        enum: [availableObjectType.id],
+        title: availableObjectType.name + ' - ' + availableObjectType.contentType,
+      });
+    });
+    if (1 < objectTypeOwner.objectSubTypes.length) {
+      const brothers = objectTypeOwner.objectSubTypes.filter(oneBrother => oneBrother.id !== objectSubType.id);
+
+      schema.properties.exclusions.items = {
+        type: 'string',
+        title: 'exclusion',
+        enum: [],
+        enumNames: [],
+      };
+      schema.properties.mandatories.items = {
+        type: 'string',
+        title: 'exclusion',
+        enum: [],
+        enumNames: [],
+      };
+      brothers.forEach(brother => {
+        schema.properties.exclusions.items.enum.push(brother.id);
+        schema.properties.mandatories.items.enum.push(brother.id);
+        schema.properties.exclusions.items.enumNames.push(brother.name);
+        schema.properties.mandatories.items.enumNames.push(brother.name);
+      });
+    } else {
+      delete schema.properties.exclusions;
+      delete schema.properties.mandatories;
+    }
+    return schema;
   }
 }

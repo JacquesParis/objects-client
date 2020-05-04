@@ -1,3 +1,4 @@
+import {ObjectContentType} from '@jacquesparis/objects-model';
 import {EntityName} from '../model/entity-name';
 import {IJsonSchema} from '../model/i-json-schema';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
@@ -15,12 +16,30 @@ const OBJECT_TYPE_SCHEMA: IJsonSchema = {
       minLength: 3,
       required: true,
     },
-    type: {
+    contentType: {
       type: 'string',
       // tslint:disable-next-line: object-literal-sort-keys
       title: 'Stockage type',
       default: '',
-      required: true,
+      nullable: false,
+      oneOf: [
+        {
+          enum: [ObjectContentType.JSON],
+          title: 'Default structure object (JSON)',
+        },
+        {
+          enum: [ObjectContentType.FILE],
+          title: 'File content',
+        },
+        {
+          enum: [ObjectContentType.FILES],
+          title: 'Files list content',
+        },
+        {
+          enum: [ObjectContentType.TEXT],
+          title: 'Text content',
+        },
+      ],
     },
     // tslint:disable-next-line: object-literal-sort-keys
     definition: {

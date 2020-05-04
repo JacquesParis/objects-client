@@ -28,7 +28,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
         if ('default' in this.restEntityService.entityDefinition.properties[key]) {
           this[key] = this.restEntityService.entityDefinition.properties[key].default;
         } else {
-          switch (this.restEntityService.entityDefinition.properties[key].type) {
+          switch (this.restEntityService.entityDefinition.properties[key].contentType) {
             case 'array':
               this[key] = [];
               break;
@@ -55,7 +55,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
         if ('default' in this.restEntityService.entityDefinition.properties[key]) {
           result[key] = this.restEntityService.entityDefinition.properties[key].default;
         } else {
-          switch (this.restEntityService.entityDefinition.properties[key].type) {
+          switch (this.restEntityService.entityDefinition.properties[key].contentType) {
             case 'array':
               result[key] = [];
               break;

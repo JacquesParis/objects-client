@@ -1,4 +1,4 @@
-import {IObjectType} from '@jacquesparis/objects-model';
+import {IObjectType, ObjectContentType} from '@jacquesparis/objects-model';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {ObjectSubTypeImpl} from '../object-sub-type/object-sub-type.impl';
 import {ObjectSubTypesService} from '../object-sub-type/object-sub-types.service';
@@ -8,7 +8,7 @@ import {ObjectTypesService} from './object-types.service';
 export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
   implements IObjectType, IEntityPropertiesWrapper<ObjectTypeImpl> {
   public name: string;
-  public type: string;
+  public contentType: ObjectContentType;
   public definition: any;
   public objectSubTypes: ObjectSubTypeImpl[] = [];
   public uri?: string;
@@ -47,7 +47,7 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
   get _entityProperties(): Partial<ObjectTypeImpl> {
     return {
       name: this.name,
-      type: this.type,
+      contentType: this.contentType,
       // tslint:disable-next-line: object-literal-sort-keys
       definition: this.definition,
     };
