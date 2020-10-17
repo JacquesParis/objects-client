@@ -24,11 +24,11 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
 
   set _editionProperties(value: Partial<T>) {
     Object.keys(this.restEntityService.entityDefinition.properties).forEach(key => {
-      if (!(key in value)) {
+      if (!(key in value) || undefined === value[key] || null === value[key]) {
         if ('default' in this.restEntityService.entityDefinition.properties[key]) {
           this[key] = this.restEntityService.entityDefinition.properties[key].default;
         } else {
-          switch (this.restEntityService.entityDefinition.properties[key].contentType) {
+          switch (this.restEntityService.entityDefinition.properties[key].type) {
             case 'array':
               this[key] = [];
               break;
@@ -55,7 +55,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
         if ('default' in this.restEntityService.entityDefinition.properties[key]) {
           result[key] = this.restEntityService.entityDefinition.properties[key].default;
         } else {
-          switch (this.restEntityService.entityDefinition.properties[key].contentType) {
+          switch (this.restEntityService.entityDefinition.properties[key].type) {
             case 'array':
               result[key] = [];
               break;
@@ -131,7 +131,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
 
   public async delete(): Promise<void> {
     if (this.restEntityService.delete) {
-      this.restEntityService.delete(this.uri);
+      await this.restEntityService.delete(this.uri);
     } else {
       throw new ErrorNoDeletionFunction<T>(this);
     }

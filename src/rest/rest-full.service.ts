@@ -26,7 +26,7 @@ export class RestFullService<T extends RestEntityImpl<T>> extends RestService<T>
     return super._patch(uri, objectType);
   }
 
-  public post(objectType: Partial<T>): Promise<T> {
+  public async post(objectType: Partial<T>): Promise<T> {
     return this._post(objectType);
   }
 

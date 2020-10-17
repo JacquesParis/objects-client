@@ -12,6 +12,10 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
       // tslint:disable-next-line: object-literal-sort-keys
       min: this.min,
       max: this.max,
+      owner: this.owner,
+      namespace: this.namespace,
+      tree: this.tree,
+      acl: this.acl,
       exclusions: this.exclusions,
       mandatories: this.mandatories,
       subObjectTypeId: this.subObjectTypeId,
@@ -22,6 +26,10 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
   public index?: number;
   public min?: number;
   public max?: number;
+  public owner?: boolean;
+  public namespace?: boolean;
+  public tree?: boolean;
+  public acl?: boolean;
   public exclusions?: string[];
   public mandatories?: string[];
   public subObjectTypeId: string;

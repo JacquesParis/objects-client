@@ -14,8 +14,8 @@ export class RestService<T extends RestEntityImpl<T>> {
     public parent: EntityName = null,
   ) {}
 
-  protected getEntityUri(entityName: EntityName = this.entityName): string {
-    return `${this.baseUri}/${this.camelToKebabCase(entityName)}s/`;
+  protected getEntityUri(entityName: EntityName = this.entityName, params: string[] = []): string {
+    return `${this.baseUri}/${this.camelToKebabCase(entityName)}s/${params.join('/')}${0 < params.length ? '/' : ''}`;
   }
 
   protected get restUri(): string {

@@ -6,46 +6,7 @@ import {IRestEntityService} from '../rest/i-rest-entity.service';
 import {IRestService} from '../rest/i-rest.service';
 import {RestService} from '../rest/rest.service';
 import {ObjectSubTypeImpl} from './object-sub-type.impl';
-
-const OBJECT_SUB_TYPE_SCHEMA: IJsonSchema = {
-  properties: {
-    name: {
-      type: 'string',
-      title: 'Name of the relation to the sub-object',
-    },
-
-    subObjectTypeId: {
-      type: 'string',
-      title: 'Type of sub-object',
-    },
-    min: {
-      type: 'number',
-      title: 'Minimum number of child',
-      minimum: 0,
-      default: 0,
-    },
-    max: {
-      type: 'number',
-      title: 'Maximum number of child',
-      default: Number.MAX_SAFE_INTEGER,
-      maximum: Number.MAX_SAFE_INTEGER,
-    },
-    exclusions: {
-      type: 'array',
-      title: 'Incompatible sub types',
-      items: {
-        type: 'string',
-      },
-    },
-    mandatories: {
-      type: 'array',
-      title: 'Mandatory sub types',
-      items: {
-        type: 'string',
-      },
-    },
-  },
-};
+import {OBJECT_SUB_TYPE_SCHEMA} from './object-sub-type.schema';
 
 export class ObjectSubTypesService extends RestService<ObjectSubTypeImpl>
   implements IRestEntityService<ObjectSubTypeImpl> {
@@ -89,7 +50,8 @@ export class ObjectSubTypesService extends RestService<ObjectSubTypeImpl>
     allObjectTypes.forEach(availableObjectType => {
       schema.properties.subObjectTypeId.oneOf.push({
         enum: [availableObjectType.id],
-        title: availableObjectType.name + ' - ' + availableObjectType.contentType,
+        title:
+          availableObjectType.name + (availableObjectType.contentType ? ' - ' + availableObjectType.contentType : ''),
       });
     });
     if (1 < objectTypeOwner.objectSubTypes.length) {
