@@ -1,8 +1,11 @@
-import {EntityName} from '../model/entity-name';
+import {IJsonSchema} from '@jacquesparis/objects-model';
+import * as _ from 'lodash-es';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
 import {IRestResponse} from '../rest/i-rest.service';
 import {IRestService} from '../rest/i-rest.service';
 import {RestFullService} from '../rest/rest-full.service';
+import {EntityName} from './../model/entity-name';
+import {ObjectTypeImpl} from './../object-type/object-type.impl';
 import {ObjectNodeImpl} from './object-node.impl';
 import {OBJECT_NODE_SCHEMA} from './object-node.schema';
 
@@ -53,5 +56,10 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
       res.push(this.getEntity(oneResult));
     });
     return res;
+  }
+  public getSchema(objectType: ObjectTypeImpl): IJsonSchema {
+    const schema = _.merge({}, this.entityDefinition, objectType.definition, this.entityDefinition);
+
+    return schema;
   }
 }

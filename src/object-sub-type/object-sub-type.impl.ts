@@ -35,11 +35,9 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
   public subObjectTypeId: string;
   public subObjectTypeUri?: string;
   public objectType?: ObjectTypeImpl;
-  constructor(
-    objectSubTypesService: ObjectSubTypesService,
-    public objectTypeId?: string,
-    public objectTypeUri?: string,
-  ) {
-    super(objectSubTypesService);
+  public objectTypeId?: string;
+  public objectTypeUri?: string;
+  constructor(objectSubTypesService: ObjectSubTypesService, objectTypeId?: string, objectTypeUri?: string) {
+    super(objectSubTypesService, {objectTypeId, objectTypeUri});
   }
 }

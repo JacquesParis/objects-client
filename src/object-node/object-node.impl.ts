@@ -1,12 +1,13 @@
 import {IObjectNode, IObjectType} from '@jacquesparis/objects-model';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {RestEntityImpl} from '../rest/rest-entity.impl';
+import {ObjectTypeImpl} from './../object-type/object-type.impl';
 import {ObjectNodesService} from './object-nodes.service';
 
 export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
   implements IObjectNode, IEntityPropertiesWrapper<ObjectNodeImpl> {
   protected get _entityProperties(): Partial<ObjectNodeImpl> {
-    return {
+    const retour = {
       name: this.name,
       // tslint:disable-next-line: object-literal-sort-keys
       objectTypeId: this.objectTypeId,
@@ -18,6 +19,12 @@ export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
       tree: this.tree,
       acl: this.acl,
     };
+    if (this.objectType && this.objectType.definition && this.objectType.definition.properties) {
+      Object.keys(this.objectType.definition.properties).forEach(key => {
+        retour[key] = this[key];
+      });
+    }
+    return retour;
   }
   public name: string;
   public objectType?: IObjectType;
@@ -32,14 +39,26 @@ export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
   public namespace?: boolean;
   public tree?: boolean;
   public acl?: boolean;
+  public parentNodeId?: string;
+  public parentNodeUri?: string;
+  public objectTypeId?: string;
+  public objectTypeUri?: string;
+  protected restEntityService: ObjectNodesService;
 
   constructor(
     objectNodesService: ObjectNodesService,
-    public parentNodeId?: string,
-    public parentNodeUri?: string,
-    public objectTypeId?: string,
-    public objectTypeUri?: string,
+    parentNodeId?: string,
+    parentNodeUri?: string,
+    objectTypeId?: string,
+    objectTypeUri?: string,
   ) {
-    super(objectNodesService);
+    super(objectNodesService, {parentNodeId, parentNodeUri, objectTypeId, objectTypeUri});
+  }
+
+  get entityDefinition() {
+    if (this.objectType) {
+      return this.restEntityService.getSchema((this.objectType as unknown) as ObjectTypeImpl);
+    }
+    return this.restEntityService.entityDefinition;
   }
 }

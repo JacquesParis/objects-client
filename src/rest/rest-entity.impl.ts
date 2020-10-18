@@ -8,6 +8,10 @@ import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {IRestEntityService} from './i-rest-entity.service';
 export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   implements IEntityPropertiesWrapper<T>, IRestEntity {
+  get entityDefinition() {
+    return this.restEntityService.entityDefinition;
+  }
+
   set editionProperties(value: Partial<T>) {
     if (this.enableAutoSave) {
       this.updateEditionProperties(value);
@@ -23,12 +27,12 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   }
 
   set _editionProperties(value: Partial<T>) {
-    Object.keys(this.restEntityService.entityDefinition.properties).forEach(key => {
+    Object.keys(this.entityDefinition.properties).forEach(key => {
       if (!(key in value) || undefined === value[key] || null === value[key]) {
-        if ('default' in this.restEntityService.entityDefinition.properties[key]) {
-          this[key] = this.restEntityService.entityDefinition.properties[key].default;
+        if ('default' in this.entityDefinition.properties[key]) {
+          this[key] = this.entityDefinition.properties[key].default;
         } else {
-          switch (this.restEntityService.entityDefinition.properties[key].type) {
+          switch (this.entityDefinition.properties[key].type) {
             case 'array':
               this[key] = [];
               break;
@@ -50,12 +54,12 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   }
   get _editionProperties(): Partial<T> {
     const result = _.cloneDeep(this.entityProperties);
-    Object.keys(this.restEntityService.entityDefinition.properties).forEach(key => {
+    Object.keys(this.entityDefinition.properties).forEach(key => {
       if (undefined === result[key] || null === result[key]) {
-        if ('default' in this.restEntityService.entityDefinition.properties[key]) {
-          result[key] = this.restEntityService.entityDefinition.properties[key].default;
+        if ('default' in this.entityDefinition.properties[key]) {
+          result[key] = this.entityDefinition.properties[key].default;
         } else {
-          switch (this.restEntityService.entityDefinition.properties[key].type) {
+          switch (this.entityDefinition.properties[key].type) {
             case 'array':
               result[key] = [];
               break;
@@ -74,11 +78,15 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   public enableAutoSave = true;
   // tslint:disable-next-line: variable-name
   protected abstract _entityProperties: Partial<T>;
+  protected restEntityService: IRestEntityService<T>;
 
-  constructor(protected restEntityService: IRestEntityService<T>) {
+  constructor(restEntityService: IRestEntityService<T>, values: Partial<T>) {
+    this.restEntityService = restEntityService;
+    this.assign(values);
+    this.updateReferences();
     const properties: {
       [name: string]: any;
-    } = this.restEntityService.entityDefinition.properties;
+    } = this.entityDefinition.properties;
     Object.keys(properties).forEach(key => {
       if ('default' in properties[key]) {
         this[key] = properties[key].default;
@@ -91,7 +99,19 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
 
   public assign(value: Partial<T>): T {
     Object.assign(this, value);
+    this.updateReferences();
     return (this as unknown) as T;
+  }
+
+  public updateReferences() {
+    if (this.uri) {
+      IRestEntityService.cachedObject[this.uri] = this;
+    }
+    Object.keys(this).forEach(key => {
+      if (key.endsWith('Uri') && _.isString(this[key]) && IRestEntityService.cachedObject[this[key]]) {
+        this[key.substr(0, key.length - 3)] = IRestEntityService.cachedObject[this[key]];
+      }
+    });
   }
 
   public async updateEditionProperties(properties: Partial<T>): Promise<void> {

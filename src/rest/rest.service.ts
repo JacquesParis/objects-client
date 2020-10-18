@@ -1,7 +1,6 @@
-import {IRestEntity} from '@jacquesparis/objects-model';
-import {IEntityPropertiesWrapper} from '../model';
+import {IJsonSchema} from '@jacquesparis/objects-model';
+
 import {EntityName} from '../model/entity-name';
-import {IJsonSchema} from '../model/i-json-schema';
 import {IRestQueryParam, IRestResponse, IRestService} from './i-rest.service';
 import {RestEntityImpl} from './rest-entity.impl';
 export class RestService<T extends RestEntityImpl<T>> {
@@ -32,6 +31,9 @@ export class RestService<T extends RestEntityImpl<T>> {
     const res: T[] = [];
     restRes.result.forEach(oneResult => {
       res.push(this.getEntity(oneResult));
+    });
+    res.forEach(entity => {
+      entity.updateReferences();
     });
     return res;
   }

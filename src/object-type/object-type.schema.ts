@@ -1,4 +1,4 @@
-import {IJsonSchema} from './../model/i-json-schema';
+import {IJsonSchema} from '@jacquesparis/objects-model';
 import {
   CONTENT_TYPE_FILE,
   CONTENT_TYPE_FILES,

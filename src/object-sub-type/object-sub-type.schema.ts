@@ -1,4 +1,4 @@
-import {IJsonSchema} from './../model/i-json-schema';
+import {IJsonSchema} from '@jacquesparis/objects-model';
 
 export const OBJECT_SUB_TYPE_SCHEMA: IJsonSchema = {
   properties: {

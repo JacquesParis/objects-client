@@ -1,8 +1,9 @@
+import {IJsonSchema} from '@jacquesparis/objects-model';
 import {EntityName} from '../model/entity-name';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
-import {IJsonSchema} from '../model/i-json-schema';
 import {IRestService} from './i-rest.service';
 export abstract class IRestEntityService<T extends IEntityPropertiesWrapper<T>> {
+  public static cachedObject: {[uri: string]: any} = {};
   public httpService: IRestService;
   public baseUri?: string;
   public entityName: EntityName;

@@ -16,7 +16,7 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
   public id?: string;
 
   constructor(objectTypesService: ObjectTypesService) {
-    super(objectTypesService);
+    super(objectTypesService, {});
   }
   get definitionString(): string {
     return JSON.stringify(this.definition, undefined, 2);

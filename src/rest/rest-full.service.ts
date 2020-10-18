@@ -1,5 +1,5 @@
+import {IJsonSchema} from '@jacquesparis/objects-model';
 import {EntityName} from '../model/entity-name';
-import {IJsonSchema} from '../model/i-json-schema';
 import {IRestService} from './i-rest.service';
 import {RestEntityImpl} from './rest-entity.impl';
 import {RestService} from './rest.service';

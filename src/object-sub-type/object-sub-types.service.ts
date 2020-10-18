@@ -1,6 +1,6 @@
+import {IJsonSchema} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
 import {EntityName} from '../model/entity-name';
-import {IJsonSchema} from '../model/i-json-schema';
 import {ObjectTypeImpl} from '../object-type/object-type.impl';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
 import {IRestService} from '../rest/i-rest.service';
