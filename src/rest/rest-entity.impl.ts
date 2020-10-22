@@ -44,7 +44,9 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
           }
         }
       } else {
-        if (_.isArray(value[key]) || _.isObject(value[key])) {
+        if ('File' === value[key]?.constructor?.name) {
+          this[key] = value[key];
+        } else if (_.isArray(value[key]) || _.isObject(value[key])) {
           this[key] = _.cloneDeep(value[key]);
         } else {
           this[key] = value[key];
