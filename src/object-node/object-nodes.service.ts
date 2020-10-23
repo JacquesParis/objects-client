@@ -17,6 +17,7 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
     return ObjectNodesService.SERVICE;
   }
   protected static SERVICE: ObjectNodesService;
+  public formDataExtention = 'multipart/';
 
   protected constructor(public httpService: IRestService, public baseUri: string) {
     super(EntityName.objectNode, OBJECT_NODE_SCHEMA, ObjectNodeImpl, httpService, baseUri);

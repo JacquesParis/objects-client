@@ -4,6 +4,7 @@ import {EntityName} from '../model/entity-name';
 import {IRestQueryParam, IRestResponse, IRestService} from './i-rest.service';
 import {RestEntityImpl} from './rest-entity.impl';
 export class RestService<T extends RestEntityImpl<T>> {
+  public formDataExtention = undefined;
   constructor(
     public entityName: EntityName,
     public entityDefinition: IJsonSchema,
@@ -15,6 +16,14 @@ export class RestService<T extends RestEntityImpl<T>> {
 
   protected getEntityUri(entityName: EntityName = this.entityName, params: string[] = []): string {
     return `${this.baseUri}/${this.camelToKebabCase(entityName)}s/${params.join('/')}${0 < params.length ? '/' : ''}`;
+  }
+
+  protected getFormDataUri(entityName: EntityName = this.entityName, params: string[] = []): string {
+    return this.getFormDataFromUri(this.getEntityUri(entityName, params));
+  }
+
+  protected getFormDataFromUri(uri: string): string {
+    return undefined === this.formDataExtention ? undefined : uri + this.formDataExtention;
   }
 
   protected get restUri(): string {
@@ -43,17 +52,18 @@ export class RestService<T extends RestEntityImpl<T>> {
   }
 
   protected async _put(uri: string, entity: Partial<T>): Promise<void> {
-    await this.httpService.put<Partial<T>>(uri, entity);
+    await this.httpService.put<Partial<T>>(uri, entity, this.getFormDataFromUri(uri));
   }
 
   protected async _patch(uri: string, entity: Partial<T>): Promise<void> {
-    await this.httpService.patch<Partial<T>>(uri, entity);
+    await this.httpService.patch<Partial<T>>(uri, entity, this.getFormDataFromUri(uri));
   }
 
   protected async _post(entity: Partial<T>): Promise<T> {
     const restRes: IRestResponse<Partial<T>> = await this.httpService.post<Partial<T>>(
       this.getParentUri(entity),
       entity,
+      this.getParentFormDataUri(entity),
     );
     return this.getEntity(restRes.result);
   }
@@ -63,6 +73,9 @@ export class RestService<T extends RestEntityImpl<T>> {
       return this.restUri;
     }
     return `${this.getEntityUri(this.parent) + entity[this.parent + 'Id']}/${this.camelToKebabCase(this.entityName)}s/`;
+  }
+  protected getParentFormDataUri(entity: Partial<T>): string {
+    return this.getFormDataFromUri(this.getParentUri(entity));
   }
 
   protected async _delete(uri: string): Promise<void> {
