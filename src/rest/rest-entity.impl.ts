@@ -1,12 +1,13 @@
 import {IRestEntity} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
+import {RestTools} from './rest-tools';
 
 import {ErrorNoCreationFunction} from '../errors/error-no-creation-function';
 import {ErrorNoDeletionFunction} from '../errors/error-no-deletion-function';
 import {ErrorNoUpdateFunction} from '../errors/error-no-update-function';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {IRestEntityService} from './i-rest-entity.service';
-export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
+export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> extends RestTools
   implements IEntityPropertiesWrapper<T>, IRestEntity {
   get entityDefinition() {
     return this.restEntityService.entityDefinition;
@@ -37,6 +38,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
               this[key] = [];
               break;
             case 'object':
+            case 'file':
               this[key] = {};
             default:
               this[key] = null;
@@ -77,15 +79,15 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
   }
   public uri?: string;
   public id?: string;
+  public updatedId: string = '' + Math.ceil(Math.random() * 100000000000000);
   public enableAutoSave = true;
   // tslint:disable-next-line: variable-name
   protected abstract _entityProperties: Partial<T>;
   protected restEntityService: IRestEntityService<T>;
 
-  constructor(restEntityService: IRestEntityService<T>, values: Partial<T>) {
+  constructor(restEntityService: IRestEntityService<T>, values?: Partial<T>) {
+    super();
     this.restEntityService = restEntityService;
-    this.assign(values);
-    this.updateReferences();
     const properties: {
       [name: string]: any;
     } = this.entityDefinition.properties;
@@ -94,6 +96,10 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
         this[key] = properties[key].default;
       }
     });
+    if (values) {
+      this.assign(values);
+    }
+    this.updateReferences();
   }
   get isNewEntity(): boolean {
     return !this.id;
@@ -105,13 +111,27 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
     return (this as unknown) as T;
   }
 
+  // tslint:disable-next-line: no-empty
+  public cleanAfterDeletion() {}
+
+  // tslint:disable-next-line: no-empty
+  public updateAfterCreation() {}
+
+  public get isReady(): boolean {
+    return !this._loadContent;
+  }
+  public async waitForReady(): Promise<void> {
+    if (this._loadContent) {
+      await this._loadContent();
+    }
+  }
   public updateReferences() {
     if (this.uri) {
-      IRestEntityService.cachedObject[this.uri] = this;
+      this.restEntityService.storeInCachedObject(this);
     }
     Object.keys(this).forEach(key => {
-      if (key.endsWith('Uri') && _.isString(this[key]) && IRestEntityService.cachedObject[this[key]]) {
-        this[key.substr(0, key.length - 3)] = IRestEntityService.cachedObject[this[key]];
+      if (key.endsWith('Uri') && _.isString(this[key]) && this.restEntityService.getCachedObject(this[key])) {
+        this[key.substr(0, key.length - 3)] = this.restEntityService.getCachedObject(this[key]);
       }
     });
   }
@@ -134,9 +154,11 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
       if (from && this.restEntityService.patch) {
         const patchProperties = this.makePatchProperties(from, to);
         if (0 < Object.keys(patchProperties).length) {
+          this.storeInCachedObject();
           await this.restEntityService.patch(this.uri, this.makePatchProperties(from, to));
         }
       } else if (this.restEntityService.put) {
+        this.storeInCachedObject();
         await this.restEntityService.put(this.uri, to);
       } else {
         throw new ErrorNoUpdateFunction<T>(this);
@@ -145,6 +167,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
       if (this.restEntityService.post) {
         const createdImpl = await this.restEntityService.post(this.entityProperties);
         Object.assign(this, createdImpl);
+        this.updateAfterCreation();
       }
     } else {
       throw new ErrorNoCreationFunction<T>(this);
@@ -158,6 +181,15 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>>
       throw new ErrorNoDeletionFunction<T>(this);
     }
   }
+
+  public storeInCachedObject() {
+    this.restEntityService.storeInCachedObject(this);
+  }
+  public removeFromCachedObject() {
+    this.restEntityService.removeFromCachedObject(this);
+  }
+
+  protected _loadContent?(): Promise<void>;
 
   protected makePatchProperties(from: Partial<T>, to?: Partial<T>): Partial<T> {
     const entityProperties = to ? _.cloneDeep(to) : this.entityProperties;

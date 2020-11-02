@@ -7,7 +7,6 @@ export const OBJECT_SUB_TYPE_SCHEMA: IJsonSchema = {
       title: 'Name of the relation to the sub-object',
       required: true,
     },
-
     subObjectTypeId: {
       type: 'string',
       title: 'Type of sub-object',

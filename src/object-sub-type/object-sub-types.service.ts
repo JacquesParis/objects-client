@@ -10,8 +10,11 @@ import {OBJECT_SUB_TYPE_SCHEMA} from './object-sub-type.schema';
 
 export class ObjectSubTypesService extends RestService<ObjectSubTypeImpl>
   implements IRestEntityService<ObjectSubTypeImpl> {
-  public static getService(httpService: IRestService, baseUri: string) {
+  public static getService(httpService?: IRestService, baseUri?: string) {
     if (!ObjectSubTypesService.SERVICE) {
+      if (!httpService || !baseUri) {
+        throw new Error('service not initialized');
+      }
       ObjectSubTypesService.SERVICE = new ObjectSubTypesService(httpService, baseUri);
     }
     return ObjectSubTypesService.SERVICE;
@@ -28,7 +31,7 @@ export class ObjectSubTypesService extends RestService<ObjectSubTypeImpl>
     );
   }
 
-  public async patch(uri: string, objectType: Partial<ObjectSubTypeImpl>): Promise<void> {
+  public async patch(uri: string, objectType: Partial<ObjectSubTypeImpl>): Promise<ObjectSubTypeImpl> {
     return super._patch(uri, objectType);
   }
 

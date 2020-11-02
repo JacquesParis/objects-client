@@ -18,11 +18,11 @@ export class RestFullService<T extends RestEntityImpl<T>> extends RestService<T>
   public async get(uri: string): Promise<T> {
     return super._get(uri);
   }
-  public async put(uri: string, objectType: Partial<T>): Promise<void> {
+  public async put(uri: string, objectType: Partial<T>): Promise<T> {
     return super._put(uri, objectType);
   }
 
-  public async patch(uri: string, objectType: Partial<T>): Promise<void> {
+  public async patch(uri: string, objectType: Partial<T>): Promise<T> {
     return super._patch(uri, objectType);
   }
 

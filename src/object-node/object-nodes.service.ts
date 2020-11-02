@@ -10,8 +10,11 @@ import {ObjectNodeImpl} from './object-node.impl';
 import {OBJECT_NODE_SCHEMA} from './object-node.schema';
 
 export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implements IRestEntityService<ObjectNodeImpl> {
-  public static getService(httpService: IRestService, baseUri: string) {
+  public static getService(httpService?: IRestService, baseUri?: string) {
     if (!ObjectNodesService.SERVICE) {
+      if (!httpService || !baseUri) {
+        throw new Error('service not initialized');
+      }
       ObjectNodesService.SERVICE = new ObjectNodesService(httpService, baseUri);
     }
     return ObjectNodesService.SERVICE;
@@ -50,7 +53,7 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
 
   public async getChilds(treeId: string) {
     const restRes: IRestResponse<ObjectNodeImpl[]> = await this.httpService.get<ObjectNodeImpl[]>(
-      this.getEntityUri(EntityName.objectTree, ['id', treeId, 'nodes']),
+      this.getEntityUri(EntityName.objectTree, [treeId, 'nodes']),
     );
     const res: ObjectNodeImpl[] = [];
     restRes.result.forEach(oneResult => {
@@ -59,7 +62,13 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
     return res;
   }
   public getSchema(objectType: ObjectTypeImpl): IJsonSchema {
-    const schema = _.merge({}, this.entityDefinition, objectType.definition, this.entityDefinition);
+    const schema = _.merge(
+      {},
+      this.entityDefinition,
+      objectType.definition,
+      this.entityDefinition,
+      objectType.contentDefinition,
+    );
 
     return schema;
   }

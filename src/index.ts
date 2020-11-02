@@ -7,3 +7,5 @@ export * from './model';
 export * from './object-sub-type';
 
 export * from './object-node';
+
+export * from './object-tree';

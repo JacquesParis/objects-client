@@ -11,6 +11,7 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
   public name: string;
   public contentType: ObjectContentType;
   public definition: any;
+  public contentDefinition: any;
   public objectSubTypes: ObjectSubTypeImpl[] = [];
   public uri?: string;
   public id?: string;
@@ -33,11 +34,7 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
     if (this.objectSubTypes) {
       const subTypes: ObjectSubTypeImpl[] = [];
       this.objectSubTypes.forEach(objectSubType => {
-        subTypes.push(
-          new ObjectSubTypeImpl(
-            ObjectSubTypesService.getService(this.restEntityService.httpService, this.restEntityService.baseUri),
-          ).assign(objectSubType),
-        );
+        subTypes.push(new ObjectSubTypeImpl(ObjectSubTypesService.getService()).assign(objectSubType));
       });
       this.objectSubTypes = subTypes;
     }

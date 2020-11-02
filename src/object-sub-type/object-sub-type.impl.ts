@@ -2,7 +2,7 @@ import {IObjectSubType} from '@jacquesparis/objects-model';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {ObjectTypeImpl} from '../object-type/object-type.impl';
 import {RestEntityImpl} from '../rest/rest-entity.impl';
-import {ObjectSubTypesService} from './object-sub-types.service';
+import {ObjectTypesService} from './../object-type/object-types.service';
 
 export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
   implements IObjectSubType, IEntityPropertiesWrapper<ObjectSubTypeImpl> {
@@ -32,12 +32,21 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
   public acl?: boolean;
   public exclusions?: string[];
   public mandatories?: string[];
+  public subObjectType?: ObjectTypeImpl;
   public subObjectTypeId: string;
   public subObjectTypeUri?: string;
   public objectType?: ObjectTypeImpl;
   public objectTypeId?: string;
   public objectTypeUri?: string;
-  constructor(objectSubTypesService: ObjectSubTypesService, objectTypeId?: string, objectTypeUri?: string) {
-    super(objectSubTypesService, {objectTypeId, objectTypeUri});
+
+  public cleanAfterDeletion() {
+    const objectSubTypeParent: ObjectTypeImpl = ObjectTypesService.getService().getCachedObjectById(this.objectTypeId);
+    this.replaceInArray(objectSubTypeParent.objectSubTypes, this, true);
+    super.cleanAfterDeletion();
+  }
+
+  public updateAfterCreation() {
+    const objectSubTypeParent: ObjectTypeImpl = ObjectTypesService.getService().getCachedObjectById(this.objectTypeId);
+    this.replaceInArray(objectSubTypeParent.objectSubTypes, this);
   }
 }

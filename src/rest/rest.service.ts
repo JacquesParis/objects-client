@@ -1,9 +1,17 @@
 import {IJsonSchema} from '@jacquesparis/objects-model';
+import {RestTools} from './rest-tools';
 
 import {EntityName} from '../model/entity-name';
+import {IRestEntityService} from './i-rest-entity.service';
 import {IRestQueryParam, IRestResponse, IRestService} from './i-rest.service';
 import {RestEntityImpl} from './rest-entity.impl';
-export class RestService<T extends RestEntityImpl<T>> {
+
+import * as _ from 'lodash-es';
+
+export class RestService<T extends RestEntityImpl<T>> extends RestTools {
+  protected get restUri(): string {
+    return this.getEntityUri();
+  }
   public formDataExtention = undefined;
   constructor(
     public entityName: EntityName,
@@ -12,22 +20,57 @@ export class RestService<T extends RestEntityImpl<T>> {
     public httpService: IRestService,
     public baseUri?: string,
     public parent: EntityName = null,
-  ) {}
+  ) {
+    super();
+  }
+
+  public getCachedObjects(): T[] {
+    return IRestEntityService.cachedObject[this.restUri];
+  }
+
+  public getCachedObject(uri): T {
+    return IRestEntityService.cachedObject[uri];
+  }
+
+  public getCachedObjectById(id): T {
+    return IRestEntityService.cachedObject[this.getUri(id)];
+  }
+  public storeInCachedObject(entity: T | T[]) {
+    if (_.isArray(entity)) {
+      IRestEntityService.cachedObject[this.restUri] = entity;
+    } else {
+      const uri = (entity as T).uri ? (entity as T).uri : (entity as T).id ? this.getUri((entity as T).id) : null;
+      if (uri) {
+        IRestEntityService.cachedObject[uri] = entity;
+        const restUri = this.restUriFromEntityUri(uri);
+        if (IRestEntityService.cachedObject[restUri] && _.isArray(IRestEntityService.cachedObject[restUri])) {
+          this.replaceInArray(IRestEntityService.cachedObject[restUri], entity);
+        }
+      }
+    }
+  }
+
+  public removeFromCachedObject(entity: T | T[]) {
+    if (_.isArray(entity)) {
+      delete IRestEntityService.cachedObject[this.restUri];
+    } else {
+      const uri = (entity as T).uri ? (entity as T).uri : (entity as T).id ? this.getUri((entity as T).id) : null;
+      if (uri) {
+        const restUri = this.restUriFromEntityUri(uri);
+        if (IRestEntityService.cachedObject[restUri] && _.isArray(IRestEntityService.cachedObject[restUri])) {
+          this.replaceInArray(IRestEntityService.cachedObject[restUri], entity, true);
+        }
+        delete IRestEntityService.cachedObject[uri];
+      }
+    }
+  }
+
+  public getUri(id: string): string {
+    return this.getEntityUri(this.entityName, [id]);
+  }
 
   protected getEntityUri(entityName: EntityName = this.entityName, params: string[] = []): string {
-    return `${this.baseUri}/${this.camelToKebabCase(entityName)}s/${params.join('/')}${0 < params.length ? '/' : ''}`;
-  }
-
-  protected getFormDataUri(entityName: EntityName = this.entityName, params: string[] = []): string {
-    return this.getFormDataFromUri(this.getEntityUri(entityName, params));
-  }
-
-  protected getFormDataFromUri(uri: string): string {
-    return undefined === this.formDataExtention ? undefined : uri + this.formDataExtention;
-  }
-
-  protected get restUri(): string {
-    return this.getEntityUri();
+    return `${this.baseUri}/${this.camelToKebabCase(entityName)}s${0 < params.length ? '/' : ''}${params.join('/')}`;
   }
 
   protected async _get(uri: string): Promise<T> {
@@ -44,6 +87,9 @@ export class RestService<T extends RestEntityImpl<T>> {
     res.forEach(entity => {
       entity.updateReferences();
     });
+    if (!queryParams) {
+      this.storeInCachedObject(res);
+    }
     return res;
   }
 
@@ -51,38 +97,37 @@ export class RestService<T extends RestEntityImpl<T>> {
     return new this.cnstrctor(this).assign(result);
   }
 
-  protected async _put(uri: string, entity: Partial<T>): Promise<void> {
-    await this.httpService.put<Partial<T>>(uri, entity, this.getFormDataFromUri(uri));
+  protected async _put(uri: string, entity: Partial<T>): Promise<T> {
+    const restRes: IRestResponse<Partial<T>> = await this.httpService.put<Partial<T>>(uri, entity);
+    return this.getCachedObject(uri).assign(restRes.result);
   }
 
-  protected async _patch(uri: string, entity: Partial<T>): Promise<void> {
-    await this.httpService.patch<Partial<T>>(uri, entity, this.getFormDataFromUri(uri));
+  protected async _patch(uri: string, entity: Partial<T>): Promise<T> {
+    const restRes: IRestResponse<Partial<T>> = await this.httpService.patch<Partial<T>>(uri, entity);
+    return this.getCachedObject(uri).assign(restRes.result);
   }
 
   protected async _post(entity: Partial<T>): Promise<T> {
     const restRes: IRestResponse<Partial<T>> = await this.httpService.post<Partial<T>>(
       this.getParentUri(entity),
       entity,
-      this.getParentFormDataUri(entity),
     );
     return this.getEntity(restRes.result);
+  }
+
+  protected async _delete(uri: string): Promise<void> {
+    await this.httpService.delete(uri);
+    this.getCachedObject(uri)?.cleanAfterDeletion();
+    this.getCachedObject(uri)?.removeFromCachedObject();
   }
 
   protected getParentUri(entity: Partial<T>): string {
     if (!this.parent) {
       return this.restUri;
     }
-    return `${this.getEntityUri(this.parent) + entity[this.parent + 'Id']}/${this.camelToKebabCase(this.entityName)}s/`;
-  }
-  protected getParentFormDataUri(entity: Partial<T>): string {
-    return this.getFormDataFromUri(this.getParentUri(entity));
-  }
-
-  protected async _delete(uri: string): Promise<void> {
-    await this.httpService.delete(uri);
-  }
-
-  private camelToKebabCase(str: string) {
-    return str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+    return `${this.getEntityUri(this.parent, [
+      entity[this.parent + 'Id'],
+      this.camelToKebabCase(this.entityName) + 's',
+    ])}`;
   }
 }
