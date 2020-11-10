@@ -39,6 +39,10 @@ export const OBJECT_TYPE_SCHEMA: IJsonSchema = {
           enum: [CONTENT_TYPE_TEXT],
           title: 'Text content',
         },
+        {
+          enum: ['ContentUser'],
+          title: 'User',
+        },
       ],
     },
     // tslint:disable-next-line: object-literal-sort-keys

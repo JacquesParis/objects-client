@@ -9,3 +9,5 @@ export * from './object-sub-type';
 export * from './object-node';
 
 export * from './object-tree';
+
+export * from './app-user';

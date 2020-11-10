@@ -25,7 +25,7 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
   protected constructor(public httpService: IRestService, public baseUri: string) {
     super(EntityName.objectNode, OBJECT_NODE_SCHEMA, ObjectNodeImpl, httpService, baseUri);
   }
-
+  /*
   public async getAll(
     ownerType: string,
     ownerName: string,
@@ -60,7 +60,7 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
       res.push(this.getEntity(oneResult));
     });
     return res;
-  }
+  }*/
   public getSchema(objectType: ObjectTypeImpl): IJsonSchema {
     const schema = _.merge(
       {},

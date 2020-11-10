@@ -3,4 +3,5 @@ export enum EntityName {
   objectSubType = 'objectSubType',
   objectNode = 'objectNode',
   objectTree = 'objectTree',
+  appUser = 'user',
 }

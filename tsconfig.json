@@ -13,7 +13,7 @@
     "alwaysStrict": true, // Enable JavaScript's "use strict" mode
     "declaration": true,
     "outDir": "./lib",
-    "lib": ["es2015"]
+    "lib": ["es6"]
   },
   //  "include": ["**/*.ts", "**/*.tsx"],
   "include": ["src"],
