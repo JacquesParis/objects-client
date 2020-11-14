@@ -24,12 +24,9 @@ export class AppUserService extends RestFullService<AppUserImpl> implements IRes
     super(EntityName.appUser, APP_USER_SCHEMA, AppUserImpl, httpService, baseUri);
   }
 
-  public async login(
-    credentials: {email: string; password: string},
-    rememberMe: boolean = false,
-  ): Promise<AppUserImpl> {
+  public async login(credentials: {email: string; password: string}): Promise<AppUserImpl> {
     const result = await this._post(credentials, this.getEntityUri(EntityName.appUser, ['login']));
-    RestService.setAuthToken(result.token, rememberMe);
+    RestService.setAuthToken(result.token);
     this._user = omit(result, 'token');
     return result;
   }
@@ -39,7 +36,7 @@ export class AppUserService extends RestFullService<AppUserImpl> implements IRes
     try {
       this._user = await this._get(this.getEntityUri(EntityName.appUser, ['me']));
     } catch (error) {
-      RestService.setAuthToken(undefined, true);
+      RestService.setAuthToken(undefined);
       throw error;
     }
     return this._user;
@@ -63,6 +60,6 @@ export class AppUserService extends RestFullService<AppUserImpl> implements IRes
   }
 
   public async logout(): Promise<void> {
-    RestService.setAuthToken(undefined, true);
+    RestService.setAuthToken(undefined);
   }
 }

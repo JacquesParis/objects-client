@@ -34,7 +34,7 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
     if (this.objectSubTypes) {
       const subTypes: ObjectSubTypeImpl[] = [];
       this.objectSubTypes.forEach(objectSubType => {
-        subTypes.push(new ObjectSubTypeImpl(ObjectSubTypesService.getService()).assign(objectSubType));
+        subTypes.push(ObjectSubTypesService.getService().getEntity(objectSubType));
       });
       this.objectSubTypes = subTypes;
     }

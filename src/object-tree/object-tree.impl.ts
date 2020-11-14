@@ -17,15 +17,18 @@ export class ObjectTreeImpl extends RestEntityImpl<ObjectTreeImpl>
   }
 
   public assign(value: Partial<ObjectTreeImpl>): ObjectTreeImpl {
-    super.assign(value);
+    super.assign(value, false);
     if (!this.children) {
       this.children = [];
     }
     if (this.treeNode) {
-      this.treeNode = new ObjectNodeImpl(ObjectNodesService.getService(), this.treeNode);
+      this.treeNode = ObjectNodesService.getService().getEntity(this.treeNode);
       if (this.children) {
         for (const index of Object.keys(this.children)) {
-          this.children[index] = new ObjectTreeImpl(this.restEntityService, this.children[index]);
+          if (!this.children[index].id) {
+            this.children[index].id = this.children[index].treeNode?.id;
+          }
+          this.children[index] = this.restEntityService.getEntity(this.children[index]);
         }
       }
       if (!this.id) {
@@ -33,13 +36,14 @@ export class ObjectTreeImpl extends RestEntityImpl<ObjectTreeImpl>
       }
       this.storeInCachedObject();
       if (this.uri) {
-        this._loadContent = this.loadSubTree.bind(this);
+        this.setLoadContentFunction(this.loadSubTree.bind(this));
       }
     }
+    this.notifyChanges();
     return this;
   }
   protected async loadSubTree(): Promise<void> {
-    delete this._loadContent;
+    this.setContentLoaded();
     await this.restEntityService.get(this.uri);
   }
 }

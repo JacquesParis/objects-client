@@ -65,6 +65,7 @@ export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
     const parentTree = ObjectTreesService.getService().getCachedObjectById(this.parentNodeId);
     const tree = ObjectTreesService.getService().getCachedObjectById(this.id);
     this.replaceInArray(parentTree.children, tree, true);
+    parentTree.notifyChanges();
     super.cleanAfterDeletion();
   }
 

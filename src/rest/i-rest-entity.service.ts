@@ -19,4 +19,5 @@ export abstract class IRestEntityService<T extends IEntityPropertiesWrapper<T>> 
   public abstract storeInCachedObject(entity: T | T[] | any);
   public abstract removeFromCachedObject(entity: T | T[] | any);
   public abstract getUri(id: string): string;
+  public abstract getEntity(Partial): T;
 }

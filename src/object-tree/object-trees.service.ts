@@ -21,15 +21,17 @@ export class ObjectTreesService extends RestService<ObjectTreeImpl> implements I
   }
 
   public async get(uri: string): Promise<ObjectTreeImpl> {
-    const previousTree = this.getCachedObject(uri);
+    // const previousTree = this.getCachedObject(uri);
     const tree = await super._get(uri);
+    tree.setContentLoaded();
+    /*
     if (previousTree) {
       previousTree.treeNode.assign(tree.treeNode);
       previousTree.children = tree.children;
       this.storeInCachedObject(previousTree);
       //      this.replaceInArray(parentTree.children, tree);
       return previousTree;
-    }
+    }*/
     return tree;
   }
 
@@ -41,7 +43,7 @@ export class ObjectTreesService extends RestService<ObjectTreeImpl> implements I
     treeType?: string,
     treeName?: string,
   ): Promise<ObjectTreeImpl> {
-    return super._get(
+    const tree = await super._get(
       this.getEntityUri(
         EntityName.objectTree,
         treeType
@@ -51,5 +53,7 @@ export class ObjectTreesService extends RestService<ObjectTreeImpl> implements I
           : ['owner', ownerType, ownerName],
       ),
     );
+    tree.setContentLoaded();
+    return tree;
   }
 }

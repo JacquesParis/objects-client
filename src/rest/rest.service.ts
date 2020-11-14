@@ -13,14 +13,12 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
   protected get restUri(): string {
     return this.getEntityUri();
   }
-  public static setAuthToken(authToken: string, rememberMe: boolean) {
+  public static setAuthToken(authToken: string) {
     if (undefined === authToken) {
       authToken = 'none';
     }
     RestService._authToken = authToken;
-    if (rememberMe || 'none' === authToken) {
-      LocalStorageWorker.add('user.token', authToken);
-    }
+    LocalStorageWorker.add('user.token', authToken);
   }
   public static get authToken(): string {
     if (null === RestService._authToken) {
@@ -55,11 +53,12 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
   public getCachedObjectById(id): T {
     return IRestEntityService.cachedObject[this.getUri(id)];
   }
-  public storeInCachedObject(entity: T | T[]) {
-    if (_.isArray(entity)) {
-      IRestEntityService.cachedObject[this.restUri] = entity;
+  public storeInCachedObject(entityOrArray: T | T[]) {
+    if (_.isArray(entityOrArray)) {
+      IRestEntityService.cachedObject[this.restUri] = entityOrArray;
     } else {
-      const uri = (entity as T).uri ? (entity as T).uri : (entity as T).id ? this.getUri((entity as T).id) : null;
+      const entity: T = entityOrArray as T;
+      const uri = entity.uri ? entity.uri : entity.id ? this.getUri(entity.id) : null;
       if (uri) {
         IRestEntityService.cachedObject[uri] = entity;
         const restUri = this.restUriFromEntityUri(uri);
@@ -70,11 +69,12 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
     }
   }
 
-  public removeFromCachedObject(entity: T | T[]) {
-    if (_.isArray(entity)) {
+  public removeFromCachedObject(entityOrArray: T | T[]) {
+    if (_.isArray(entityOrArray)) {
       delete IRestEntityService.cachedObject[this.restUri];
     } else {
-      const uri = (entity as T).uri ? (entity as T).uri : (entity as T).id ? this.getUri((entity as T).id) : null;
+      const entity = entityOrArray as T;
+      const uri = entity.uri ? entity.uri : entity.id ? this.getUri(entity.id) : null;
       if (uri) {
         const restUri = this.restUriFromEntityUri(uri);
         if (IRestEntityService.cachedObject[restUri] && _.isArray(IRestEntityService.cachedObject[restUri])) {
@@ -87,6 +87,22 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
 
   public getUri(id: string): string {
     return this.getEntityUri(this.entityName, [id]);
+  }
+
+  public getEntity(result: Partial<T>): T {
+    const uri = result.uri ? result.uri : result.id ? this.getUri(result.id) : null;
+    let entity: T = uri && this.getCachedObject(uri);
+    if (entity) {
+      const ref = new this.cnstrctor(this);
+      for (const key in entity) {
+        if (!(key in ref)) {
+          delete entity[key];
+        }
+      }
+    } else {
+      entity = new this.cnstrctor(this);
+    }
+    return entity.assign(result);
   }
 
   protected getEntityUri(entityName: EntityName = this.entityName, params: string[] = []): string {
@@ -119,10 +135,6 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
       this.storeInCachedObject(res);
     }
     return res;
-  }
-
-  protected getEntity(result) {
-    return new this.cnstrctor(this).assign(result);
   }
 
   protected async _put(uri: string, entity: Partial<T>): Promise<T> {

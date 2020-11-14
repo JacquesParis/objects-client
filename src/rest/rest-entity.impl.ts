@@ -1,12 +1,11 @@
 import {IRestEntity} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
-import {RestTools} from './rest-tools';
-
 import {ErrorNoCreationFunction} from '../errors/error-no-creation-function';
 import {ErrorNoDeletionFunction} from '../errors/error-no-deletion-function';
 import {ErrorNoUpdateFunction} from '../errors/error-no-update-function';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {IRestEntityService} from './i-rest-entity.service';
+import {RestTools} from './rest-tools';
 export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> extends RestTools
   implements IEntityPropertiesWrapper<T>, IRestEntity {
   get entityDefinition() {
@@ -77,6 +76,13 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
     });
     return result;
   }
+  public get isNewEntity(): boolean {
+    return !this.id;
+  }
+
+  public get isReady(): boolean {
+    return !this._loadContent;
+  }
   public uri?: string;
   public id?: string;
   public updatedId: string = '' + Math.ceil(Math.random() * 100000000000000);
@@ -84,6 +90,8 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   // tslint:disable-next-line: variable-name
   protected abstract _entityProperties: Partial<T>;
   protected restEntityService: IRestEntityService<T>;
+  private subscribers: {[key: number]: () => void} = {};
+  // private loadedFunctionAlreadySet = false;
 
   constructor(restEntityService: IRestEntityService<T>, values?: Partial<T>) {
     super();
@@ -101,13 +109,18 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
     }
     this.updateReferences();
   }
-  get isNewEntity(): boolean {
-    return !this.id;
+
+  public onChange(subscriber: () => void): () => void {
+    const id = Math.ceil(Math.random() * 100000000000000000000000);
+    this.subscribers[id] = subscriber;
+    return () => {
+      delete this.subscribers[id];
+    };
   }
 
-  public assign(value: Partial<T>): T {
+  public assign(value: Partial<T>, notifyChanges = true): T {
     Object.assign(this, value);
-    this.updateReferences();
+    this.updateReferences(notifyChanges);
     return (this as unknown) as T;
   }
 
@@ -116,16 +129,12 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
 
   // tslint:disable-next-line: no-empty
   public updateAfterCreation() {}
-
-  public get isReady(): boolean {
-    return !this._loadContent;
-  }
   public async waitForReady(): Promise<void> {
     if (this._loadContent) {
       await this._loadContent();
     }
   }
-  public updateReferences() {
+  public updateReferences(notifyChanges = true) {
     if (this.uri) {
       this.restEntityService.storeInCachedObject(this);
     }
@@ -134,6 +143,15 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
         this[key.substr(0, key.length - 3)] = this.restEntityService.getCachedObject(this[key]);
       }
     });
+    if (this.notifyChanges) {
+      this.notifyChanges();
+    }
+  }
+
+  public notifyChanges() {
+    for (const key of Object.keys(this.subscribers)) {
+      this.subscribers[key]();
+    }
   }
 
   public async updateEditionProperties(properties: Partial<T>): Promise<void> {
@@ -189,7 +207,16 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
     this.restEntityService.removeFromCachedObject(this);
   }
 
-  protected _loadContent?(): Promise<void>;
+  public setContentLoaded() {
+    delete this._loadContent;
+  }
+
+  protected setLoadContentFunction(loadFunction: () => Promise<void>): void {
+    // if (!this.loadedFunctionAlreadySet) {
+    // this.loadedFunctionAlreadySet = true;
+    this._loadContent = loadFunction;
+    // }
+  }
 
   protected makePatchProperties(from: Partial<T>, to?: Partial<T>): Partial<T> {
     const entityProperties = to ? _.cloneDeep(to) : this.entityProperties;
@@ -206,4 +233,6 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
     }
     return entityProperties;
   }
+
+  private _loadContent?(): Promise<void>;
 }
