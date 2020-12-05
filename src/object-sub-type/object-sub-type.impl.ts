@@ -1,8 +1,9 @@
-import {IObjectSubType} from '@jacquesparis/objects-model';
+import {IJsonSchema, IObjectSubType} from '@jacquesparis/objects-model';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {ObjectTypeImpl} from '../object-type/object-type.impl';
 import {RestEntityImpl} from '../rest/rest-entity.impl';
 import {ObjectTypesService} from './../object-type/object-types.service';
+import {ObjectSubTypesService} from './object-sub-types.service';
 
 export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
   implements IObjectSubType, IEntityPropertiesWrapper<ObjectSubTypeImpl> {
@@ -38,6 +39,7 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
   public objectType?: ObjectTypeImpl;
   public objectTypeId?: string;
   public objectTypeUri?: string;
+  protected restEntityService: ObjectSubTypesService;
 
   public cleanAfterDeletion() {
     const objectSubTypeParent: ObjectTypeImpl = ObjectTypesService.getService().getCachedObjectById(this.objectTypeId);
@@ -48,5 +50,21 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
   public updateAfterCreation() {
     const objectSubTypeParent: ObjectTypeImpl = ObjectTypesService.getService().getCachedObjectById(this.objectTypeId);
     this.replaceInArray(objectSubTypeParent.objectSubTypes, this);
+  }
+
+  get entityDefinition(): IJsonSchema {
+    let schema: IJsonSchema;
+    if (this.entityCtx?.entityDefinition) {
+      schema = this.entityCtx.entityDefinition;
+    } else if (this.objectType) {
+      schema = this.restEntityService.getSchema(
+        this,
+        this.objectType,
+        ObjectTypesService.getService().getCachedObjects(),
+      );
+    } else {
+      schema = this.restEntityService.entityDefinition;
+    }
+    return schema;
   }
 }

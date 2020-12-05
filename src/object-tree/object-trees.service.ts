@@ -53,7 +53,7 @@ export class ObjectTreesService extends RestService<ObjectTreeImpl> implements I
           : ['owner', ownerType, ownerName],
       ),
     );
-    tree.setContentLoaded();
+    // tree.setContentLoaded();
     return tree;
   }
 }

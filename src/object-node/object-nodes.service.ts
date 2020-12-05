@@ -62,13 +62,27 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
     return res;
   }*/
   public getSchema(objectType: ObjectTypeImpl): IJsonSchema {
-    const schema = _.merge(
-      {},
-      this.entityDefinition,
-      objectType.definition,
-      this.entityDefinition,
-      objectType.contentDefinition,
+    const schema: IJsonSchema = _.cloneDeep(
+      _.merge({}, this.entityDefinition, objectType.definition, this.entityDefinition, objectType.contentDefinition),
     );
+    if (schema?.properties) {
+      for (const key of Object.keys(schema.properties)) {
+        for (const option of Object.keys(schema.properties[key])) {
+          switch (option) {
+            case 'oneOfTree':
+              schema.properties[key].oneOfFunction = async (): Promise<any> => {
+                return [
+                  {
+                    enum: ['Repository/public/Category/templates/TravelStoryTemplate/travelStory'],
+                    title: 'public - templates - travelStory',
+                  },
+                ];
+              };
+              break;
+          }
+        }
+      }
+    }
 
     return schema;
   }

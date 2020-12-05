@@ -1,14 +1,18 @@
-import {IRestEntity} from '@jacquesparis/objects-model';
+import {IAclCtx, IRestEntity} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
 import {ErrorNoCreationFunction} from '../errors/error-no-creation-function';
 import {ErrorNoDeletionFunction} from '../errors/error-no-deletion-function';
 import {ErrorNoUpdateFunction} from '../errors/error-no-update-function';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
+import {IJsonSchema} from './../../lib/model/i-json-schema.d';
 import {IRestEntityService} from './i-rest-entity.service';
 import {RestTools} from './rest-tools';
 export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> extends RestTools
   implements IEntityPropertiesWrapper<T>, IRestEntity {
   get entityDefinition() {
+    if (this.entityCtx?.entityDefinition) {
+      return this.entityCtx?.entityDefinition;
+    }
     return this.restEntityService.entityDefinition;
   }
 
@@ -87,6 +91,12 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   public id?: string;
   public updatedId: string = '' + Math.ceil(Math.random() * 100000000000000);
   public enableAutoSave = true;
+  public entityCtx?: {
+    entityDefinition?: IJsonSchema;
+    aclCtx?: IAclCtx;
+    loaded?: boolean;
+    actions?: {creations?: {[id: string]: IJsonSchema}; reads?: string[]};
+  };
   // tslint:disable-next-line: variable-name
   protected abstract _entityProperties: Partial<T>;
   protected restEntityService: IRestEntityService<T>;
@@ -137,6 +147,11 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   public updateReferences(notifyChanges = true) {
     if (this.uri) {
       this.restEntityService.storeInCachedObject(this);
+      if (this.entityCtx?.loaded === false) {
+        this.setLoadContentFunction(this.loadEntity.bind(this));
+      } else {
+        this.setContentLoaded();
+      }
     }
     Object.keys(this).forEach(key => {
       if (key.endsWith('Uri') && _.isString(this[key]) && this.restEntityService.getCachedObject(this[key])) {
@@ -211,6 +226,10 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
     delete this._loadContent;
   }
 
+  protected async loadEntity(): Promise<void> {
+    this.setContentLoaded();
+    await this.restEntityService.get(this.uri);
+  }
   protected setLoadContentFunction(loadFunction: () => Promise<void>): void {
     // if (!this.loadedFunctionAlreadySet) {
     // this.loadedFunctionAlreadySet = true;

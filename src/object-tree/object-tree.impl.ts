@@ -35,15 +35,17 @@ export class ObjectTreeImpl extends RestEntityImpl<ObjectTreeImpl>
         this.id = this.treeNode.id;
       }
       this.storeInCachedObject();
+      /*
       if (this.uri) {
         this.setLoadContentFunction(this.loadSubTree.bind(this));
-      }
+      }*/
     }
     this.notifyChanges();
     return this;
   }
+  /*
   protected async loadSubTree(): Promise<void> {
     this.setContentLoaded();
     await this.restEntityService.get(this.uri);
-  }
+  }*/
 }

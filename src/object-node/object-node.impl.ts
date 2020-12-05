@@ -2,6 +2,7 @@ import {IObjectNode, IObjectType} from '@jacquesparis/objects-model';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {ObjectTreesService} from '../object-tree';
 import {RestEntityImpl} from '../rest/rest-entity.impl';
+import {IJsonSchema} from './../../lib/model/i-json-schema.d';
 import {ObjectTypeImpl} from './../object-type/object-type.impl';
 import {ObjectNodesService} from './object-nodes.service';
 
@@ -54,11 +55,16 @@ export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
   public objectTypeUri?: string;
   protected restEntityService: ObjectNodesService;
 
-  get entityDefinition() {
-    if (this.objectType) {
-      return this.restEntityService.getSchema((this.objectType as unknown) as ObjectTypeImpl);
+  get entityDefinition(): IJsonSchema {
+    let schema: IJsonSchema;
+    if (this.entityCtx?.entityDefinition) {
+      schema = this.entityCtx.entityDefinition;
+    } else if (this.objectType) {
+      schema = this.restEntityService.getSchema((this.objectType as unknown) as ObjectTypeImpl);
+    } else {
+      schema = this.restEntityService.entityDefinition;
     }
-    return this.restEntityService.entityDefinition;
+    return schema;
   }
 
   public cleanAfterDeletion() {

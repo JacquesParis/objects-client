@@ -16,6 +16,15 @@ export const OBJECT_TYPE_SCHEMA: IJsonSchema = {
       minLength: 3,
       required: true,
     },
+
+    inheritedTypesIds: {
+      type: 'array',
+      title: 'Inherited types',
+      items: {
+        type: 'string',
+        default: '',
+      },
+    },
     contentType: {
       type: 'string',
       // tslint:disable-next-line: object-literal-sort-keys
