@@ -65,6 +65,7 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
     const schema: IJsonSchema = _.cloneDeep(
       _.merge({}, this.entityDefinition, objectType.definition, this.entityDefinition, objectType.contentDefinition),
     );
+    /*
     if (schema?.properties) {
       for (const key of Object.keys(schema.properties)) {
         for (const option of Object.keys(schema.properties[key])) {
@@ -82,8 +83,7 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
           }
         }
       }
-    }
-
+    }*/
     return schema;
   }
 }

@@ -57,8 +57,8 @@ export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
 
   get entityDefinition(): IJsonSchema {
     let schema: IJsonSchema;
-    if (this.entityCtx?.entityDefinition) {
-      schema = this.entityCtx.entityDefinition;
+    if (this.entityCtx?.jsonSchema) {
+      schema = this.entityCtx.jsonSchema;
     } else if (this.objectType) {
       schema = this.restEntityService.getSchema((this.objectType as unknown) as ObjectTypeImpl);
     } else {

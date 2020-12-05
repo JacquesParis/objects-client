@@ -54,8 +54,8 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
 
   get entityDefinition(): IJsonSchema {
     let schema: IJsonSchema;
-    if (this.entityCtx?.entityDefinition) {
-      schema = this.entityCtx.entityDefinition;
+    if (this.entityCtx?.jsonSchema) {
+      schema = this.entityCtx.jsonSchema;
     } else if (this.objectType) {
       schema = this.restEntityService.getSchema(
         this,

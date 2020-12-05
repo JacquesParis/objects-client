@@ -10,8 +10,8 @@ import {RestTools} from './rest-tools';
 export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> extends RestTools
   implements IEntityPropertiesWrapper<T>, IRestEntity {
   get entityDefinition() {
-    if (this.entityCtx?.entityDefinition) {
-      return this.entityCtx?.entityDefinition;
+    if (this.entityCtx?.jsonSchema) {
+      return this.entityCtx?.jsonSchema;
     }
     return this.restEntityService.entityDefinition;
   }
@@ -92,7 +92,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   public updatedId: string = '' + Math.ceil(Math.random() * 100000000000000);
   public enableAutoSave = true;
   public entityCtx?: {
-    entityDefinition?: IJsonSchema;
+    jsonSchema?: IJsonSchema;
     aclCtx?: IAclCtx;
     loaded?: boolean;
     actions?: {creations?: {[id: string]: IJsonSchema}; reads?: string[]};
