@@ -228,7 +228,11 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
 
   protected async loadEntity(): Promise<void> {
     this.setContentLoaded();
-    await this.restEntityService.get(this.uri);
+    try {
+      await this.restEntityService.get(this.uri);
+    } catch (error) {
+      this.setLoadContentFunction(this.loadEntity.bind(this));
+    }
   }
   protected setLoadContentFunction(loadFunction: () => Promise<void>): void {
     // if (!this.loadedFunctionAlreadySet) {
