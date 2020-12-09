@@ -23,7 +23,7 @@ export class ObjectTreesService extends RestService<ObjectTreeImpl> implements I
   public async get(uri: string): Promise<ObjectTreeImpl> {
     // const previousTree = this.getCachedObject(uri);
     const tree = await super._get(uri);
-    tree.setContentLoaded();
+    // tree.setContentLoaded();
     /*
     if (previousTree) {
       previousTree.treeNode.assign(tree.treeNode);

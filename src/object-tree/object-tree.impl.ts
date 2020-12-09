@@ -10,6 +10,14 @@ export class ObjectTreeImpl extends RestEntityImpl<ObjectTreeImpl>
   public children: ObjectTreeImpl[];
   public parentTree: ObjectTreeImpl;
   public treeNode: ObjectNodeImpl;
+
+  public ownerType?: string;
+  public ownerName?: string;
+  public namespaceType?: string;
+  public namespaceName?: string;
+  public treeType?: string;
+  public treeName?: string;
+
   protected _entityProperties: Partial<ObjectTreeImpl> = {};
 
   public childrenByType(objectTypeId) {
@@ -21,6 +29,7 @@ export class ObjectTreeImpl extends RestEntityImpl<ObjectTreeImpl>
     if (!this.children) {
       this.children = [];
     }
+    /*
     if (this.treeNode) {
       this.treeNode = ObjectNodesService.getService().getEntity(this.treeNode);
       if (this.children) {
@@ -35,12 +44,8 @@ export class ObjectTreeImpl extends RestEntityImpl<ObjectTreeImpl>
         this.id = this.treeNode.id;
       }
       this.storeInCachedObject();
-      /*
-      if (this.uri) {
-        this.setLoadContentFunction(this.loadSubTree.bind(this));
-      }*/
     }
-    this.notifyChanges();
+    this.notifyChanges();*/
     return this;
   }
   /*

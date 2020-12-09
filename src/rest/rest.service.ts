@@ -10,8 +10,12 @@ import {RestEntityImpl} from './rest-entity.impl';
 import * as _ from 'lodash-es';
 
 export class RestService<T extends RestEntityImpl<T>> extends RestTools {
+  public static registeredServices: {[entityName in EntityName]?: RestService<any>} = {};
   protected get restUri(): string {
     return this.getEntityUri();
+  }
+  public static getEntityService(entityName: EntityName) {
+    return RestService.registeredServices[entityName];
   }
   public static setAuthToken(authToken: string) {
     if (undefined === authToken) {
@@ -40,6 +44,7 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
     public parent: EntityName = null,
   ) {
     super();
+    RestService.registeredServices[entityName] = this;
   }
 
   public getCachedObjects(): T[] {
@@ -61,9 +66,15 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
       const uri = entity.uri ? entity.uri : entity.id ? this.getUri(entity.id) : null;
       if (uri) {
         IRestEntityService.cachedObject[uri] = entity;
+        if (entity.aliasUri) {
+          IRestEntityService.cachedObject[entity.aliasUri] = entity;
+        }
         const restUri = this.restUriFromEntityUri(uri);
         if (IRestEntityService.cachedObject[restUri] && _.isArray(IRestEntityService.cachedObject[restUri])) {
           this.replaceInArray(IRestEntityService.cachedObject[restUri], entity);
+        }
+        if (entity.aliasUri) {
+          IRestEntityService.cachedObject[entity.aliasUri] = entity;
         }
       }
     }

@@ -1,14 +1,20 @@
-import {IAclCtx, IRestEntity} from '@jacquesparis/objects-model';
+import {IEntityContext, IRestEntity} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
 import {ErrorNoCreationFunction} from '../errors/error-no-creation-function';
 import {ErrorNoDeletionFunction} from '../errors/error-no-deletion-function';
 import {ErrorNoUpdateFunction} from '../errors/error-no-update-function';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
-import {IJsonSchema} from './../../lib/model/i-json-schema.d';
 import {IRestEntityService} from './i-rest-entity.service';
 import {RestTools} from './rest-tools';
+import {RestService} from './rest.service';
+
 export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> extends RestTools
   implements IEntityPropertiesWrapper<T>, IRestEntity {
+  public REST_ENTITY = true;
+  [key: string]: any;
+  public entityCtx?: IEntityContext;
+  public aliasUri?: string;
+
   get entityDefinition() {
     if (this.entityCtx?.jsonSchema) {
       return this.entityCtx?.jsonSchema;
@@ -91,12 +97,6 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   public id?: string;
   public updatedId: string = '' + Math.ceil(Math.random() * 100000000000000);
   public enableAutoSave = true;
-  public entityCtx?: {
-    jsonSchema?: IJsonSchema;
-    aclCtx?: IAclCtx;
-    loaded?: boolean;
-    actions?: {creations?: {[id: string]: IJsonSchema}; reads?: string[]};
-  };
   // tslint:disable-next-line: variable-name
   protected abstract _entityProperties: Partial<T>;
   protected restEntityService: IRestEntityService<T>;
@@ -130,6 +130,31 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
 
   public assign(value: Partial<T>, notifyChanges = true): T {
     Object.assign(this, value);
+
+    for (const key of Object.keys(this)) {
+      if (_.isArray(this[key])) {
+        for (const index of Object.keys(this[key])) {
+          if (_.isObject(this[key][index]) && this[key][index].entityCtx?.entityType && !this[key].REST_ENTITY) {
+            this[key][index] = RestService.getEntityService(this[key][index].entityCtx.entityType).getEntity(
+              this[key][index],
+            );
+          }
+        }
+      } else if (_.isObject(this[key]) && !this[key].REST_ENTITY && this[key].entityCtx?.entityType) {
+        this[key] = RestService.getEntityService(this[key].entityCtx.entityType).getEntity(this[key]);
+      }
+    }
+    /*
+    this.treeNode = ObjectNodesService.getService().getEntity(this.treeNode);
+      if (this.children) {
+        for (const index of Object.keys(this.children)) {
+          if (!this.children[index].id) {
+            this.children[index].id = this.children[index].treeNode?.id;
+          }
+          this.children[index] = this.restEntityService.getEntity(this.children[index]);
+        }
+      }*/
+
     this.updateReferences(notifyChanges);
     return (this as unknown) as T;
   }
@@ -153,11 +178,12 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
         this.setContentLoaded();
       }
     }
-    Object.keys(this).forEach(key => {
+
+    for (const key of Object.keys(this)) {
       if (key.endsWith('Uri') && _.isString(this[key]) && this.restEntityService.getCachedObject(this[key])) {
         this[key.substr(0, key.length - 3)] = this.restEntityService.getCachedObject(this[key]);
       }
-    });
+    }
     if (this.notifyChanges) {
       this.notifyChanges();
     }
