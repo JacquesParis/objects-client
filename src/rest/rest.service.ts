@@ -58,6 +58,16 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
   public getCachedObjectById(id): T {
     return IRestEntityService.cachedObject[this.getUri(id)];
   }
+
+  public async getCachedOrRemoteObjectById(id): Promise<T> {
+    const uri = this.getUri(id);
+    const cachedObject = this.getCachedObject(uri);
+    if (cachedObject) {
+      return cachedObject;
+    }
+    return this._get(uri);
+  }
+
   public storeInCachedObject(entityOrArray: T | T[]) {
     if (_.isArray(entityOrArray)) {
       IRestEntityService.cachedObject[this.restUri] = entityOrArray;

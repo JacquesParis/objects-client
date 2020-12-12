@@ -169,6 +169,26 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
       await this._loadContent();
     }
   }
+
+  public recursiveUpdateReferences(recursiveUris: string[] = []) {
+    if (this.uri && -1 === _.indexOf(recursiveUris, this.uri)) {
+      recursiveUris.push(this.uri);
+      for (const key of Object.keys(this)) {
+        if (_.isArray(this[key])) {
+          for (const subEntity of this[key]) {
+            if (subEntity.recursiveUpdateReferences) {
+              subEntity.recursiveUpdateReferences(recursiveUris);
+            }
+          }
+        } else if (_.isObject(this[key]) && this[key].recursiveUpdateReferences) {
+          this[key].recursiveUpdateReferences(recursiveUris);
+        } else if (key.endsWith('Uri') && _.isString(this[key]) && this.restEntityService.getCachedObject(this[key])) {
+          this[key.substr(0, key.length - 3)] = this.restEntityService.getCachedObject(this[key]);
+        }
+      }
+    }
+  }
+
   public updateReferences(notifyChanges = true) {
     if (this.uri) {
       this.restEntityService.storeInCachedObject(this);
@@ -179,11 +199,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
       }
     }
 
-    for (const key of Object.keys(this)) {
-      if (key.endsWith('Uri') && _.isString(this[key]) && this.restEntityService.getCachedObject(this[key])) {
-        this[key.substr(0, key.length - 3)] = this.restEntityService.getCachedObject(this[key]);
-      }
-    }
+    this.recursiveUpdateReferences();
     if (this.notifyChanges) {
       this.notifyChanges();
     }
