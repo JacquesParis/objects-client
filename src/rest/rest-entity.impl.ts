@@ -33,7 +33,13 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
     return this._editionProperties;
   }
   get entityProperties(): Partial<T> {
-    return this._entityProperties;
+    const properties: object = this._entityProperties;
+    if (this.entityCtx?.jsonSchema?.properties) {
+      for (const propertyKey of Object.keys(this.entityCtx.jsonSchema.properties)) {
+        properties[propertyKey] = this[propertyKey];
+      }
+    }
+    return properties;
   }
 
   set _editionProperties(value: Partial<T>) {

@@ -21,6 +21,7 @@ export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
       tree: this.tree,
       acl: this.acl,
     };
+    /*
     if (this.objectType && this.objectType.definition && this.objectType.definition.properties) {
       Object.keys(this.objectType.definition.properties).forEach(key => {
         retour[key] = this[key];
@@ -30,7 +31,7 @@ export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
       Object.keys(this.objectType.contentDefinition.properties).forEach(key => {
         retour[key] = this[key];
       });
-    }
+    }*/
     return retour;
   }
   public name: string;
