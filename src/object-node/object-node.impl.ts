@@ -79,4 +79,8 @@ export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
   public updateAfterCreation() {
     ObjectTreesService.getService().get(ObjectTreesService.getService().getUri(this.parentTreeId as string));
   }
+
+  public updateAfterAction() {
+    ObjectTreesService.getService().get(ObjectTreesService.getService().getUri(this.parentTreeId as string));
+  }
 }

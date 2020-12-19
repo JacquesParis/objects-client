@@ -1,4 +1,4 @@
-import {IEntityContext, IRestEntity} from '@jacquesparis/objects-model';
+import {IEntityContext, IEntityMethod, IRestEntity} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
 import {ErrorNoCreationFunction} from '../errors/error-no-creation-function';
 import {ErrorNoDeletionFunction} from '../errors/error-no-deletion-function';
@@ -108,6 +108,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   protected restEntityService: IRestEntityService<T>;
   private subscribers: {[key: number]: () => void} = {};
   // private loadedFunctionAlreadySet = false;
+  private onGoingPromise: Promise<void>;
 
   constructor(restEntityService: IRestEntityService<T>, values?: Partial<T>) {
     super();
@@ -172,7 +173,10 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   public updateAfterCreation() {}
   public async waitForReady(): Promise<void> {
     if (this._loadContent) {
-      await this._loadContent();
+      this.onGoingPromise = this._loadContent();
+      return this.onGoingPromise;
+    } else if (this.onGoingPromise) {
+      return this.onGoingPromise;
     }
   }
 
@@ -193,6 +197,16 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
         }
       }
     }
+  }
+
+  // tslint:disable-next-line: no-empty
+  public updateAfterAction() {}
+
+  public async runAction(method: IEntityMethod, args): Promise<any> {
+    const uri = this.uri + '/method/' + method.methodId;
+    const result = await this.restEntityService.runAction(uri, args);
+    this.updateAfterAction();
+    return result;
   }
 
   public updateReferences(notifyChanges = true) {

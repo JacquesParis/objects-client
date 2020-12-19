@@ -10,19 +10,8 @@ import {RestEntityImpl} from './rest-entity.impl';
 import * as _ from 'lodash-es';
 
 export class RestService<T extends RestEntityImpl<T>> extends RestTools {
-  public static registeredServices: {[entityName in EntityName]?: RestService<any>} = {};
   protected get restUri(): string {
     return this.getEntityUri();
-  }
-  public static getEntityService(entityName: EntityName) {
-    return RestService.registeredServices[entityName];
-  }
-  public static setAuthToken(authToken: string) {
-    if (undefined === authToken) {
-      authToken = 'none';
-    }
-    RestService._authToken = authToken;
-    LocalStorageWorker.add('user.token', authToken);
   }
   public static get authToken(): string {
     if (null === RestService._authToken) {
@@ -32,6 +21,25 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
       }
     }
     return 'none' === RestService._authToken ? undefined : RestService._authToken;
+  }
+
+  protected get headers(): IRestHeaders {
+    const headers: IRestHeaders = {};
+    if (RestService.authToken) {
+      headers.Authorization = 'Bearer ' + RestService.authToken;
+    }
+    return headers;
+  }
+  public static registeredServices: {[entityName in EntityName]?: RestService<any>} = {};
+  public static getEntityService(entityName: EntityName) {
+    return RestService.registeredServices[entityName];
+  }
+  public static setAuthToken(authToken: string) {
+    if (undefined === authToken) {
+      authToken = 'none';
+    }
+    RestService._authToken = authToken;
+    LocalStorageWorker.add('user.token', authToken);
   }
   private static _authToken = null;
   public formDataExtention = undefined;
@@ -126,16 +134,13 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
     return entity.assign(result);
   }
 
-  protected getEntityUri(entityName: EntityName = this.entityName, params: string[] = []): string {
-    return `${this.baseUri}/${this.camelToKebabCase(entityName)}s${0 < params.length ? '/' : ''}${params.join('/')}`;
+  public async runAction(uri: string, args: any): Promise<any> {
+    const restRes: IRestResponse<Partial<T>> = await this.httpService.post<any>(uri, args, this.headers);
+    return restRes.result;
   }
 
-  protected get headers(): IRestHeaders {
-    const headers: IRestHeaders = {};
-    if (RestService.authToken) {
-      headers.Authorization = 'Bearer ' + RestService.authToken;
-    }
-    return headers;
+  protected getEntityUri(entityName: EntityName = this.entityName, params: string[] = []): string {
+    return `${this.baseUri}/${this.camelToKebabCase(entityName)}s${0 < params.length ? '/' : ''}${params.join('/')}`;
   }
 
   protected async _get(uri: string): Promise<T> {
