@@ -136,7 +136,7 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
 
   public async runAction(uri: string, args: any): Promise<any> {
     const restRes: IRestResponse<Partial<T>> = await this.httpService.post<any>(uri, args, this.headers);
-    return restRes.result;
+    return this.getEntity(restRes.result);
   }
 
   protected getEntityUri(entityName: EntityName = this.entityName, params: string[] = []): string {

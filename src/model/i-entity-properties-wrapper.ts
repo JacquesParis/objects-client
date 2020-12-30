@@ -11,5 +11,5 @@ export interface IEntityPropertiesWrapper<T extends IRestEntity> extends IRestEn
   delete(): Promise<void>;
   assign(value: Partial<T>): T;
   waitForReady(): Promise<void>;
-  runAction(method: IEntityMethod, args): Promise<any>;
+  runAction(methodId: string, args): Promise<any>;
 }

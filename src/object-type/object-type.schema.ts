@@ -56,7 +56,7 @@ export const OBJECT_TYPE_SCHEMA: IJsonSchema = {
     },
     // tslint:disable-next-line: object-literal-sort-keys
     definition: {
-      type: 'object',
+      type: ['number', 'string', 'boolean', 'object', 'array', 'null'],
       // tslint:disable-next-line: object-literal-sort-keys
       title: 'Object type json schema description',
       'x-schema-form': {

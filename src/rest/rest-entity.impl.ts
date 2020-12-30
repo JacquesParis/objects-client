@@ -202,9 +202,10 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   // tslint:disable-next-line: no-empty
   public updateAfterAction() {}
 
-  public async runAction(method: IEntityMethod, args): Promise<any> {
-    const uri = this.uri + '/method/' + method.methodId;
+  public async runAction(methodId: string, args): Promise<any> {
+    const uri = this.uri + '/method/' + methodId;
     const result = await this.restEntityService.runAction(uri, args);
+
     this.updateAfterAction();
     return result;
   }
