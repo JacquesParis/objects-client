@@ -1,8 +1,7 @@
-import {IObjectNode, IObjectType} from '@jacquesparis/objects-model';
+import {IJsonSchema, IObjectNode, IObjectType} from '@jacquesparis/objects-model';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {ObjectTreesService} from '../object-tree';
 import {RestEntityImpl} from '../rest/rest-entity.impl';
-import {IJsonSchema} from './../../lib/model/i-json-schema.d';
 import {ObjectTypeImpl} from './../object-type/object-type.impl';
 import {ObjectNodesService} from './object-nodes.service';
 
