@@ -118,14 +118,20 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
     return this.getEntityUri(this.entityName, [id]);
   }
 
-  public getEntity(result: Partial<T>): T {
+  public getEntity(result: Partial<T>, refreshEntity = false): T {
     const uri = result.uri ? result.uri : result.id ? this.getUri(result.id) : null;
     let entity: T = uri && this.getCachedObject(uri);
     if (entity) {
-      const ref = new this.cnstrctor(this);
-      for (const key in entity) {
-        if (!(key in ref)) {
-          delete entity[key];
+      if (refreshEntity) {
+        const ref = new this.cnstrctor(this);
+        for (const key in entity) {
+          if (!(key in ref)) {
+            delete entity[key];
+          }
+        }
+      } else {
+        if (result.entityCtx?.loaded === false && entity.entityCtx?.loaded === true) {
+          delete result.entityCtx.loaded;
         }
       }
     } else {
@@ -136,7 +142,7 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
 
   public async runAction(uri: string, args: any): Promise<any> {
     const restRes: IRestResponse<Partial<T>> = await this.httpService.post<any>(uri, args, this.headers);
-    return this.getEntity(restRes.result);
+    return this.getEntity(restRes.result, true);
   }
 
   protected getEntityUri(entityName: EntityName = this.entityName, params: string[] = []): string {
@@ -145,14 +151,14 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
 
   protected async _get(uri: string): Promise<T> {
     const restRes: IRestResponse<T> = await this.httpService.get<T>(uri, undefined, this.headers);
-    return this.getEntity(restRes.result);
+    return this.getEntity(restRes.result, true);
   }
 
   protected async _getAll(queryParams?: IRestQueryParam): Promise<T[]> {
     const restRes: IRestResponse<T[]> = await this.httpService.get<T[]>(this.restUri, queryParams, this.headers);
     const res: T[] = [];
     restRes.result.forEach(oneResult => {
-      res.push(this.getEntity(oneResult));
+      res.push(this.getEntity(oneResult, true));
     });
     res.forEach(entity => {
       entity.updateReferences();
@@ -165,12 +171,12 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
 
   protected async _put(uri: string, entity: Partial<T>): Promise<T> {
     const restRes: IRestResponse<Partial<T>> = await this.httpService.put<Partial<T>>(uri, entity, this.headers);
-    return this.getCachedObject(uri).assign(restRes.result);
+    return this.getEntity(restRes.result, true);
   }
 
   protected async _patch(uri: string, entity: Partial<T>): Promise<T> {
     const restRes: IRestResponse<Partial<T>> = await this.httpService.patch<Partial<T>>(uri, entity, this.headers);
-    return this.getCachedObject(uri).assign(restRes.result);
+    return this.getEntity(restRes.result, true);
   }
 
   protected async _post(entity: Partial<T>, uri?: string): Promise<T> {
@@ -179,7 +185,7 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
       entity,
       this.headers,
     );
-    return this.getEntity(restRes.result);
+    return this.getEntity(restRes.result, true);
   }
 
   protected async _delete(uri: string): Promise<void> {

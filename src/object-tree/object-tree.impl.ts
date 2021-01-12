@@ -25,7 +25,7 @@ export class ObjectTreeImpl extends RestEntityImpl<ObjectTreeImpl>
   }
 
   public assign(value: Partial<ObjectTreeImpl>): ObjectTreeImpl {
-    super.assign(value, false);
+    super.assign(value);
     if (!this.children) {
       this.children = [];
     }

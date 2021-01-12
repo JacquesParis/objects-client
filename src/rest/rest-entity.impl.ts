@@ -172,7 +172,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   // tslint:disable-next-line: no-empty
   public updateAfterCreation() {}
   public async waitForReady(): Promise<void> {
-    if (this._loadContent) {
+    if (this._loadContent && !this.onGoingPromise) {
       this.onGoingPromise = this._loadContent();
       return this.onGoingPromise;
     } else if (this.onGoingPromise) {
@@ -213,7 +213,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   public updateReferences(notifyChanges = true) {
     if (this.uri) {
       this.restEntityService.storeInCachedObject(this);
-      if (this.entityCtx?.loaded === false) {
+      if (this.entityCtx?.loaded === false && !this.onGoingPromise) {
         this.setLoadContentFunction(this.loadEntity.bind(this));
       } else {
         this.setContentLoaded();
