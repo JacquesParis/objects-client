@@ -131,7 +131,7 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
         }
       } else {
         if (result.entityCtx?.loaded === false && entity.entityCtx?.loaded === true) {
-          delete result.entityCtx.loaded;
+          return entity;
         }
       }
     } else {
