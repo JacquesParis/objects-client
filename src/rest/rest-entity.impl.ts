@@ -213,7 +213,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   public updateReferences(notifyChanges = true) {
     if (this.uri) {
       this.restEntityService.storeInCachedObject(this);
-      if (this.entityCtx?.loaded === false && !this.onGoingPromise) {
+      if (!this.entityCtx?.loaded && !this.onGoingPromise) {
         this.setLoadContentFunction(this.loadEntity.bind(this));
       } else {
         this.setContentLoaded();

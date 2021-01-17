@@ -122,7 +122,7 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
     const uri = result.uri ? result.uri : result.id ? this.getUri(result.id) : null;
     let entity: T = uri && this.getCachedObject(uri);
     if (entity) {
-      if (refreshEntity) {
+      if (refreshEntity || true === result.entityCtx?.loaded) {
         const ref = new this.cnstrctor(this);
         for (const key in entity) {
           if (!(key in ref)) {
@@ -130,9 +130,7 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
           }
         }
       } else {
-        if (result.entityCtx?.loaded === false && entity.entityCtx?.loaded === true) {
-          return entity;
-        }
+        return entity;
       }
     } else {
       entity = new this.cnstrctor(this);
