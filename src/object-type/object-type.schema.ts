@@ -65,5 +65,24 @@ export const OBJECT_TYPE_SCHEMA: IJsonSchema = {
       default: {},
       required: true,
     },
+    // tslint:disable-next-line: object-literal-sort-keys
+    templateView: {
+      type: 'string',
+      // tslint:disable-next-line: object-literal-sort-keys
+      title: 'Preview template',
+      'x-schema-form': {
+        type: 'textarea',
+      },
+      default: '',
+      required: false,
+    },
+    // tslint:disable-next-line: object-literal-sort-keys
+    iconView: {
+      type: 'string',
+      // tslint:disable-next-line: object-literal-sort-keys
+      title: 'Icon class',
+      default: '',
+      required: false,
+    },
   },
 };

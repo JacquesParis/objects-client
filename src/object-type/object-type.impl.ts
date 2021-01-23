@@ -16,6 +16,8 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
   public objectSubTypes: ObjectSubTypeImpl[] = [];
   public uri?: string;
   public id?: string;
+  public templateView?: string;
+  public iconView?: string;
 
   constructor(objectTypesService: ObjectTypesService) {
     super(objectTypesService, {});
@@ -50,6 +52,8 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
       contentType: this.contentType,
       // tslint:disable-next-line: object-literal-sort-keys
       definition: this.definition,
+      templateView: this.templateView ? this.templateView : '',
+      iconView: this.iconView ? this.iconView : '',
     };
   }
 }
