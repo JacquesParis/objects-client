@@ -71,6 +71,7 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
     const uri = this.getUri(id);
     const cachedObject = this.getCachedObject(uri);
     if (cachedObject) {
+      await cachedObject.waitForReady();
       return cachedObject;
     }
     return this._get(uri);
