@@ -1,6 +1,6 @@
 {
   "name": "@jacquesparis/objects-client",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "client class",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
