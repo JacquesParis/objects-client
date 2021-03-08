@@ -1,3 +1,5 @@
+import {helpers} from 'handlebars';
+
 export * from './object-type';
 
 export * from './rest';
@@ -13,3 +15,5 @@ export * from './object-tree';
 export * from './app-user';
 
 export * from './object-client.service';
+
+export * from './helper/object-client-configuration.service';
