@@ -1,5 +1,3 @@
-import {helpers} from 'handlebars';
-
 export * from './object-type';
 
 export * from './rest';
