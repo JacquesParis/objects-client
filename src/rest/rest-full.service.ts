@@ -9,7 +9,7 @@ export class RestFullService<T extends RestEntityImpl<T>> extends RestService<T>
     public entityName: EntityName,
     public entityDefinition: IJsonSchema,
     protected cnstrctor: new (restService: RestService<T>) => T,
-    public httpService: IRestService,
+    httpService: IRestService,
     public baseUri?: string,
   ) {
     super(entityName, entityDefinition, cnstrctor, httpService, baseUri);

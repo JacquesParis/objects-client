@@ -1,3 +1,4 @@
+import {ObjectClientConfigurationService} from '../helper/object-client-configuration.service';
 import {EntityName} from '../model/entity-name';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
 import {IRestService} from '../rest/i-rest.service';
@@ -7,7 +8,10 @@ import {ObjectTypeImpl} from './object-type.impl';
 import {OBJECT_TYPE_SCHEMA} from './object-type.schema';
 
 export class ObjectTypesService extends RestFullService<ObjectTypeImpl> implements IRestEntityService<ObjectTypeImpl> {
-  public static getService(httpService?: IRestService, baseUri?: string) {
+  public static getService(
+    httpService: IRestService = ObjectClientConfigurationService.httpService,
+    baseUri: string = ObjectClientConfigurationService.baseUri,
+  ) {
     if (!ObjectTypesService.SERVICE) {
       if (!httpService || !baseUri) {
         throw new Error('service not initialized');
@@ -18,7 +22,7 @@ export class ObjectTypesService extends RestFullService<ObjectTypeImpl> implemen
   }
   protected static SERVICE: ObjectTypesService;
 
-  protected constructor(public httpService: IRestService, public baseUri: string) {
+  protected constructor(httpService: IRestService, public baseUri: string) {
     super(EntityName.objectType, OBJECT_TYPE_SCHEMA, ObjectTypeImpl, httpService, baseUri);
   }
 

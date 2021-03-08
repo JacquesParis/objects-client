@@ -11,3 +11,5 @@ export * from './object-node';
 export * from './object-tree';
 
 export * from './app-user';
+
+export * from './object-client.service';

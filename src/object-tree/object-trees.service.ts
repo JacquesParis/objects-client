@@ -1,3 +1,4 @@
+import {ObjectClientConfigurationService} from '../helper/object-client-configuration.service';
 import {EntityName} from '../model/entity-name';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
 import {IRestService} from '../rest/i-rest.service';
@@ -5,7 +6,10 @@ import {RestService} from '../rest/rest.service';
 import {ObjectTreeImpl} from './object-tree.impl';
 
 export class ObjectTreesService extends RestService<ObjectTreeImpl> implements IRestEntityService<ObjectTreeImpl> {
-  public static getService(httpService?: IRestService, baseUri?: string) {
+  public static getService(
+    httpService: IRestService = ObjectClientConfigurationService.httpService,
+    baseUri: string = ObjectClientConfigurationService.baseUri,
+  ) {
     if (!ObjectTreesService.SERVICE) {
       if (!httpService || !baseUri) {
         throw new Error('service not initialized');
@@ -16,7 +20,7 @@ export class ObjectTreesService extends RestService<ObjectTreeImpl> implements I
   }
   protected static SERVICE: ObjectTreesService;
 
-  protected constructor(public httpService: IRestService, public baseUri: string) {
+  protected constructor(httpService: IRestService, public baseUri: string) {
     super(EntityName.objectTree, {properties: {}}, ObjectTreeImpl, httpService, baseUri);
   }
 

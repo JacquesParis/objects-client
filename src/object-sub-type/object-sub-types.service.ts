@@ -1,5 +1,6 @@
 import {IJsonSchema} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
+import {ObjectClientConfigurationService} from '../helper/object-client-configuration.service';
 import {EntityName} from '../model/entity-name';
 import {ObjectTypeImpl} from '../object-type/object-type.impl';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
@@ -10,7 +11,10 @@ import {OBJECT_SUB_TYPE_SCHEMA} from './object-sub-type.schema';
 
 export class ObjectSubTypesService extends RestService<ObjectSubTypeImpl>
   implements IRestEntityService<ObjectSubTypeImpl> {
-  public static getService(httpService?: IRestService, baseUri?: string) {
+  public static getService(
+    httpService: IRestService = ObjectClientConfigurationService.httpService,
+    baseUri: string = ObjectClientConfigurationService.baseUri,
+  ) {
     if (!ObjectSubTypesService.SERVICE) {
       if (!httpService || !baseUri) {
         throw new Error('service not initialized');
@@ -20,7 +24,7 @@ export class ObjectSubTypesService extends RestService<ObjectSubTypeImpl>
     return ObjectSubTypesService.SERVICE;
   }
   protected static SERVICE: ObjectSubTypesService;
-  protected constructor(public httpService: IRestService, public baseUri: string) {
+  protected constructor(httpService: IRestService, public baseUri: string) {
     super(
       EntityName.objectSubType,
       OBJECT_SUB_TYPE_SCHEMA,

@@ -1,7 +1,7 @@
 import {IJsonSchema} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
+import {ObjectClientConfigurationService} from '../helper/object-client-configuration.service';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
-import {IRestResponse} from '../rest/i-rest.service';
 import {IRestService} from '../rest/i-rest.service';
 import {RestFullService} from '../rest/rest-full.service';
 import {EntityName} from './../model/entity-name';
@@ -10,7 +10,10 @@ import {ObjectNodeImpl} from './object-node.impl';
 import {OBJECT_NODE_SCHEMA} from './object-node.schema';
 
 export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implements IRestEntityService<ObjectNodeImpl> {
-  public static getService(httpService?: IRestService, baseUri?: string) {
+  public static getService(
+    httpService: IRestService = ObjectClientConfigurationService.httpService,
+    baseUri: string = ObjectClientConfigurationService.baseUri,
+  ) {
     if (!ObjectNodesService.SERVICE) {
       if (!httpService || !baseUri) {
         throw new Error('service not initialized');
@@ -22,7 +25,7 @@ export class ObjectNodesService extends RestFullService<ObjectNodeImpl> implemen
   protected static SERVICE: ObjectNodesService;
   public formDataExtention = 'multipart/';
 
-  protected constructor(public httpService: IRestService, public baseUri: string) {
+  protected constructor(httpService: IRestService, public baseUri: string) {
     super(EntityName.objectNode, OBJECT_NODE_SCHEMA, ObjectNodeImpl, httpService, baseUri);
   }
   /*

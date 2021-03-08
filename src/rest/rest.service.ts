@@ -1,5 +1,6 @@
 import {IJsonSchema} from '@jacquesparis/objects-model';
 import {LocalStorageWorker} from './../helper/storage-helper';
+import {ProxyHttpService} from './proxy-http.service';
 import {RestTools} from './rest-tools';
 
 import {EntityName} from '../model/entity-name';
@@ -42,16 +43,18 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
     LocalStorageWorker.add('user.token', authToken);
   }
   private static _authToken = null;
+  public httpService: IRestService;
   public formDataExtention = undefined;
   constructor(
     public entityName: EntityName,
     public entityDefinition: IJsonSchema,
     protected cnstrctor: new (restService: RestService<T>) => T,
-    public httpService: IRestService,
+    originalHttpService: IRestService,
     public baseUri?: string,
     public parent: EntityName = null,
   ) {
     super();
+    this.httpService = new ProxyHttpService(originalHttpService);
     RestService.registeredServices[entityName] = this;
   }
 
@@ -139,8 +142,8 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
     return entity.assign(result);
   }
 
-  public async runAction(uri: string, args: any): Promise<any> {
-    const restRes: IRestResponse<Partial<T>> = await this.httpService.post<any>(uri, args, this.headers);
+  public async runAction(uri: string, parameters: any): Promise<any> {
+    const restRes: IRestResponse<Partial<T>> = await this.httpService.post<any>(uri, parameters, this.headers);
     return this.getEntity(restRes.result, true);
   }
 

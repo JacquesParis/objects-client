@@ -1,4 +1,5 @@
 import {omit} from 'lodash-es';
+import {ObjectClientConfigurationService} from '../helper/object-client-configuration.service';
 import {IRestEntityService} from '../rest/i-rest-entity.service';
 import {RestFullService} from '../rest/rest-full.service';
 import {EntityName} from './../model/entity-name';
@@ -8,7 +9,10 @@ import {AppUserImpl} from './app-user.impl';
 import {APP_USER_SCHEMA} from './app-user.schema';
 
 export class AppUserService extends RestFullService<AppUserImpl> implements IRestEntityService<AppUserImpl> {
-  public static getService(httpService?: IRestService, baseUri?: string) {
+  public static getService(
+    httpService: IRestService = ObjectClientConfigurationService.httpService,
+    baseUri: string = ObjectClientConfigurationService.baseUri,
+  ) {
     if (!AppUserService.SERVICE) {
       if (!httpService || !baseUri) {
         throw new Error('service not initialized');
@@ -20,7 +24,7 @@ export class AppUserService extends RestFullService<AppUserImpl> implements IRes
   protected static SERVICE: AppUserService;
   private _user: AppUserImpl;
 
-  protected constructor(public httpService: IRestService, public baseUri: string) {
+  protected constructor(httpService: IRestService, public baseUri: string) {
     super(EntityName.appUser, APP_USER_SCHEMA, AppUserImpl, httpService, baseUri);
   }
 

@@ -4,10 +4,12 @@ import {ErrorNoCreationFunction} from '../errors/error-no-creation-function';
 import {ErrorNoDeletionFunction} from '../errors/error-no-deletion-function';
 import {ErrorNoUpdateFunction} from '../errors/error-no-update-function';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
+import {ObjectClientConfigurationService} from './../helper/object-client-configuration.service';
 import {IRestEntityService} from './i-rest-entity.service';
 import {RestTools} from './rest-tools';
 import {RestService} from './rest.service';
 
+import * as Handlebars from 'handlebars';
 export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> extends RestTools
   implements IEntityPropertiesWrapper<T>, IRestEntity {
   public REST_ENTITY = true;
@@ -202,9 +204,47 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   // tslint:disable-next-line: no-empty
   public updateAfterAction() {}
 
-  public async runAction(methodId: string, args): Promise<any> {
+  public async runAction(methodId: string, parameters: any, methodSampling?: string): Promise<any> {
     const uri = this.uri + '/method/' + methodId;
-    const result = await this.restEntityService.runAction(uri, args);
+    let result;
+    if (!methodSampling) {
+      result = await this.restEntityService.runAction(uri, parameters);
+    } else {
+      Handlebars.registerHelper('json', (item, options) => {
+        return JSON.stringify(item);
+      });
+      const template = Handlebars.compile(methodSampling);
+      const samples: Array<{methodId: string; parameters: any}> = JSON.parse(template(parameters));
+      try {
+        if (ObjectClientConfigurationService.optionalServices.actionsLoggingService) {
+          for (const sample of samples) {
+            ObjectClientConfigurationService.optionalServices.actionsLoggingService.initAction(
+              this.uri + '/method/' + sample.methodId,
+            );
+          }
+        }
+        while (0 < samples.length) {
+          const sample = samples.shift();
+          try {
+            result = await this.restEntityService.runAction(this.uri + '/method/' + sample.methodId, sample.parameters);
+          } finally {
+            if (ObjectClientConfigurationService.optionalServices.actionsLoggingService) {
+              ObjectClientConfigurationService.optionalServices.actionsLoggingService.endAction(
+                this.uri + '/method/' + sample.methodId,
+              );
+            }
+          }
+        }
+      } finally {
+        if (ObjectClientConfigurationService.optionalServices.actionsLoggingService) {
+          for (const sample of samples) {
+            ObjectClientConfigurationService.optionalServices.actionsLoggingService.endAction(
+              this.uri + '/method/' + sample.methodId,
+            );
+          }
+        }
+      }
+    }
 
     this.updateAfterAction();
     return result;
