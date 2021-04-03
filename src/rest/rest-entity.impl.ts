@@ -211,7 +211,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
       result = await this.restEntityService.runAction(uri, parameters);
     } else {
       Handlebars.registerHelper('json', (item, options) => {
-        return JSON.stringify(item);
+        return item === undefined ? 'null' : JSON.stringify(item);
       });
       const template = Handlebars.compile(methodSampling);
       const samples: Array<{methodId: string; parameters: any}> = JSON.parse(template(parameters));
