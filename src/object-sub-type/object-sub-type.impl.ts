@@ -10,6 +10,7 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
   protected get _entityProperties(): Partial<ObjectSubTypeImpl> {
     return {
       name: this.name,
+      title: this.title,
       // tslint:disable-next-line: object-literal-sort-keys
       min: this.min,
       max: this.max,
@@ -24,6 +25,7 @@ export class ObjectSubTypeImpl extends RestEntityImpl<ObjectSubTypeImpl>
     };
   }
   public name?: string;
+  public title?: string;
   public index?: number;
   public min?: number;
   public max?: number;

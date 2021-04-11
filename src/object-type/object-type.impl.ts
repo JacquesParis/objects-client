@@ -9,6 +9,7 @@ import {ObjectTypesService} from './object-types.service';
 export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
   implements IObjectType, IEntityPropertiesWrapper<ObjectTypeImpl> {
   public name: string;
+  public title?: string;
   public inheritedTypesIds: string[];
   public contentType: ObjectContentType;
   public definition: any;
@@ -48,6 +49,7 @@ export class ObjectTypeImpl extends RestEntityImpl<ObjectTypeImpl>
   get _entityProperties(): Partial<ObjectTypeImpl> {
     return {
       name: this.name,
+      title: this.title,
       inheritedTypesIds: this.inheritedTypesIds,
       contentType: this.contentType,
       // tslint:disable-next-line: object-literal-sort-keys

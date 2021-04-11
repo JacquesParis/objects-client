@@ -29,28 +29,6 @@ export class ObjectTreeImpl extends RestEntityImpl<ObjectTreeImpl>
     if (!this.children) {
       this.children = [];
     }
-    /*
-    if (this.treeNode) {
-      this.treeNode = ObjectNodesService.getService().getEntity(this.treeNode);
-      if (this.children) {
-        for (const index of Object.keys(this.children)) {
-          if (!this.children[index].id) {
-            this.children[index].id = this.children[index].treeNode?.id;
-          }
-          this.children[index] = this.restEntityService.getEntity(this.children[index]);
-        }
-      }
-      if (!this.id) {
-        this.id = this.treeNode.id;
-      }
-      this.storeInCachedObject();
-    }
-    this.notifyChanges();*/
     return this;
   }
-  /*
-  protected async loadSubTree(): Promise<void> {
-    this.setContentLoaded();
-    await this.restEntityService.get(this.uri);
-  }*/
 }

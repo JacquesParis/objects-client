@@ -8,8 +8,9 @@ import {ObjectNodesService} from './object-nodes.service';
 export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
   implements IObjectNode, IEntityPropertiesWrapper<ObjectNodeImpl> {
   protected get _entityProperties(): Partial<ObjectNodeImpl> {
-    const retour = {
+    const result = {
       name: this.name,
+      title: this.title,
       // tslint:disable-next-line: object-literal-sort-keys
       objectTypeId: this.objectTypeId,
       parentNodeId: this.parentNodeId,
@@ -20,20 +21,10 @@ export class ObjectNodeImpl extends RestEntityImpl<ObjectNodeImpl>
       tree: this.tree,
       acl: this.acl,
     };
-    /*
-    if (this.objectType && this.objectType.definition && this.objectType.definition.properties) {
-      Object.keys(this.objectType.definition.properties).forEach(key => {
-        retour[key] = this[key];
-      });
-    }
-    if (this.objectType && this.objectType.contentDefinition && this.objectType.contentDefinition.properties) {
-      Object.keys(this.objectType.contentDefinition.properties).forEach(key => {
-        retour[key] = this[key];
-      });
-    }*/
-    return retour;
+    return result;
   }
   public name: string;
+  public title?: string;
   public objectType?: IObjectType;
   public parentNode?: IObjectNode;
   public parentOwner?: IObjectNode;
