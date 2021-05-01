@@ -1,4 +1,4 @@
-import {IEntityContext, IEntityMethod, IRestEntity} from '@jacquesparis/objects-model';
+import {IEntityContext, IMethodResult, IRestEntity} from '@jacquesparis/objects-model';
 import * as _ from 'lodash-es';
 import {ErrorNoCreationFunction} from '../errors/error-no-creation-function';
 import {ErrorNoDeletionFunction} from '../errors/error-no-deletion-function';
@@ -204,7 +204,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
   // tslint:disable-next-line: no-empty
   public updateAfterAction() {}
 
-  public async runAction(methodId: string, parameters: any, methodSampling?: string): Promise<any> {
+  public async runAction(methodId: string, parameters: any, methodSampling?: string): Promise<IMethodResult> {
     const uri = this.uri + '/method/' + methodId;
     let result;
     if (!methodSampling) {

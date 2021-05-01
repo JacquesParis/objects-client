@@ -1,4 +1,4 @@
-import {IJsonSchema} from '@jacquesparis/objects-model';
+import {IJsonSchema, IMethodResult} from '@jacquesparis/objects-model';
 import {LocalStorageWorker} from './../helper/storage-helper';
 import {ProxyHttpService} from './proxy-http.service';
 import {RestTools} from './rest-tools';
@@ -142,7 +142,7 @@ export class RestService<T extends RestEntityImpl<T>> extends RestTools {
     return entity.assign(result);
   }
 
-  public async runAction(uri: string, parameters: any): Promise<any> {
+  public async runAction(uri: string, parameters: any): Promise<IMethodResult> {
     const restRes: IRestResponse<Partial<T>> = await this.httpService.post<any>(uri, parameters, this.headers);
     return this.getEntity(restRes.result, true);
   }

@@ -1,4 +1,4 @@
-import {IJsonSchema} from '@jacquesparis/objects-model';
+import {IJsonSchema, IMethodResult} from '@jacquesparis/objects-model';
 import {EntityName} from '../model/entity-name';
 import {IEntityPropertiesWrapper} from '../model/i-entity-properties-wrapper';
 import {IRestService} from './i-rest.service';
@@ -21,5 +21,5 @@ export abstract class IRestEntityService<T extends IEntityPropertiesWrapper<T>> 
   public abstract removeFromCachedObject(entity: T | T[] | any);
   public abstract getUri(id: string): string;
   public abstract getEntity(Partial): T;
-  public abstract runAction(uri: string, parameters: any): Promise<any>;
+  public abstract runAction(uri: string, parameters: any): Promise<IMethodResult>;
 }

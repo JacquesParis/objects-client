@@ -1,4 +1,4 @@
-import {IEntityMethod, IRestEntity} from '@jacquesparis/objects-model';
+import {IMethodResult, IRestEntity} from '@jacquesparis/objects-model';
 
 export interface IEntityPropertiesWrapper<T extends IRestEntity> extends IRestEntity {
   entityProperties: Partial<T>;
@@ -11,5 +11,5 @@ export interface IEntityPropertiesWrapper<T extends IRestEntity> extends IRestEn
   delete(): Promise<void>;
   assign(value: Partial<T>): T;
   waitForReady(): Promise<void>;
-  runAction(methodId: string, parameters: any, methodSampling?: string): Promise<any>;
+  runAction(methodId: string, parameters: any, methodSampling?: string): Promise<IMethodResult>;
 }
