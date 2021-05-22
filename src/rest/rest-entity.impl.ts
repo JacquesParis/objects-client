@@ -214,7 +214,7 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
         return item === undefined ? 'null' : JSON.stringify(item);
       });
       const template = Handlebars.compile(methodSampling);
-      const samples: Array<{methodId: string; parameters: any}> = JSON.parse(template(parameters));
+      const samples: Array<{methodId: string; parameters: any; uri?: string}> = JSON.parse(template(parameters));
       try {
         if (ObjectClientConfigurationService.optionalServices.actionsLoggingService) {
           for (const sample of samples) {
@@ -226,7 +226,10 @@ export abstract class RestEntityImpl<T extends IEntityPropertiesWrapper<T>> exte
         while (0 < samples.length) {
           const sample = samples.shift();
           try {
-            result = await this.restEntityService.runAction(this.uri + '/method/' + sample.methodId, sample.parameters);
+            result = await this.restEntityService.runAction(
+              (sample.uri ? sample.uri : this.uri) + '/method/' + sample.methodId,
+              sample.parameters,
+            );
           } finally {
             if (ObjectClientConfigurationService.optionalServices.actionsLoggingService) {
               ObjectClientConfigurationService.optionalServices.actionsLoggingService.endAction(
